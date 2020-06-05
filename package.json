@@ -1,0 +1,19 @@
+{
+  "name": "better_todo",
+  "version": "1.0.0",
+  "description": "Todo app with emphasis on functional viws and microservice API.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miguelh72/better-todo.git"
+  },
+  "author": "Miguel Hernandez",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/miguelh72/better-todo/issues"
+  },
+  "homepage": "https://github.com/miguelh72/better-todo#readme"
+}
