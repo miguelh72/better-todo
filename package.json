@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/miguelh72/better-todo/issues"
   },
-  "homepage": "https://github.com/miguelh72/better-todo#readme"
+  "homepage": "https://github.com/miguelh72/better-todo#readme",
+  "devDependencies": {
+    "jest": "^26.0.1"
+  }
 }
