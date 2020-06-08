@@ -41,7 +41,7 @@ class TaskList {
   
   __validateTask__(task) {
     if (!(task instanceof Task))
-      throw new Error("Runtime Error: Attempted to add task that does not inherit from Task.");
+      throw new Error("Runtime Error: Passed in task that does not inherit from Task.");
   }
 }
 
@@ -58,5 +58,20 @@ function createList() {
     dateUpdated: new Date(),
   });
 }*/
+
+function DateCreatedMixin(superclass) {
+  return class extends superclass {
+    
+    constructor(date = new Date(), ...other) {
+      super(other);
+      this.__dateCreated__ = date;
+    }
+    
+    getDateCreated() {
+      return this.__dateCreated__;
+    }
+    
+  }
+} 
 
 module.exports = { create, createList };
