@@ -3,8 +3,8 @@
 function DateCreatedMixin(superclass) {
   return class extends superclass {
     
-    constructor(date = new Date(), ...other) {
-      super(...other);
+    constructor(date = new Date(), ...otherArgs) {
+      super(...otherArgs);
       this.__dateCreated__ = date;
     }
     
@@ -18,8 +18,8 @@ function DateCreatedMixin(superclass) {
 function DescriptionMixin(superclass) {
   return class extends superclass {
     
-    constructor(description = "", ...other) {
-      super(...other);
+    constructor(description = "", ...otherArgs) {
+      super(...otherArgs);
       this.__description__ = description;
     }
     
@@ -29,10 +29,19 @@ function DescriptionMixin(superclass) {
     
     setDescription(description) {
       if (description == null) return false;
-      
       this.__description__ = description;
     }
     
+  }
+}
+
+function UpdatableMixin(superclass) {
+  return class extends superclass {
+    constructor(...args) {
+      super(...args);
+      const propNames = Object.getOwnPropertyNames(this);
+      console.log(propNames); // RM
+    }
   }
 }
 
@@ -48,12 +57,11 @@ class ListContainer {
   }
   
   add(item) {
-    if (this.__isValid__(item)) {
-      this.__list__.push(item);
-      return true;
-    } else {
+    if (!this.__isValid__(item)) 
       return false;
-    }
+    
+    this._list__.push(item);
+    return true;
   }
   
   remove(item) {
@@ -69,16 +77,20 @@ class ListContainer {
   }
 }
 
-class Task extends DescriptionMixin(DateCreatedMixin(Object)) {}
+class Task extends 
+  DescriptionMixin(
+  DateCreatedMixin(
+  UpdatableMixin(
+  Object))) {}
 
-class TaskList extends DescriptionMixin(ListContainer) {}
+class TaskList extends 
+  DescriptionMixin(
+  ListContainer) {}
 
-function create(content, date, options = {}) {
-  return new Task(content, date);
+function create(description, dateCreated) {
+  return new Task(description, dateCreated);
 }
-
-function createList() {
-  return new TaskList();
+function createList(description) {
+  return new TaskList(description);
 }
-
 module.exports = { create, createList };

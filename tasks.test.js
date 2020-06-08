@@ -17,7 +17,7 @@ test("Create task with defined values", () => {
   expect(task.getDateCreated()).toBe(date);
 });
 
-/**test("Update task content", () => {
+test("Update task content", () => {
   const content = "Clean code.";
   const updatedContent = "Clean and refactor code.";
   const date = new Date();
@@ -25,12 +25,14 @@ test("Create task with defined values", () => {
   
   const task = tasks.create(content, date);
   expect(task.getDateUpdated()).toBe(date);
-  task.setContent(updatedContent, updateDate);
-  expect(task.getContent()).toBe(updatedContent);
+  task.setDescription(updatedContent, updateDate);
+  expect(task.getDescription()).toBe(updatedContent);
   expect(task.getDateUpdated()).toBe(updateDate);
-});*/
+});
 
 /** Task list */
+
+// TODO test taskList description
 
 test("Create list of tasks", () => {
   const taskList = tasks.createList();
@@ -61,5 +63,3 @@ const taskList = tasks.createList();
   taskList.remove(task1);
   expect(taskList.getList()).toEqual([]);
 });
-
-// Test method chain functionality for task list
