@@ -39,8 +39,20 @@ function UpdatableMixin(superclass) {
   return class extends superclass {
     constructor(...args) {
       super(...args);
-      const propNames = Object.getOwnPropertyNames(this);
-      console.log(propNames); // RM
+      const baseObject = Object.getPrototypeOf(new Object());
+      let prototype = Object.getPrototypeOf(this);
+      while (prototype !== baseObject) {
+        for (let prop of Object.getOwnPropertyNames(prototype)) {
+          if (prop !== "constructor") {
+            // Wrap method around call to update method
+            super[prop] = function(...args) {
+              // TODO either check if keywords such as set, add, update are in prop name and update then, or refactor 
+              //so other mixins use this update mixin first.
+            }
+          }
+        }
+        prototype = Object.getPrototypeOf(prototype);
+      }
     }
   }
 }
@@ -60,7 +72,7 @@ class ListContainer {
     if (!this.__isValid__(item)) 
       return false;
     
-    this._list__.push(item);
+    this.__list__.push(item);
     return true;
   }
   
@@ -78,9 +90,9 @@ class ListContainer {
 }
 
 class Task extends 
+  UpdatableMixin(
   DescriptionMixin(
   DateCreatedMixin(
-  UpdatableMixin(
   Object))) {}
 
 class TaskList extends 
@@ -91,6 +103,6 @@ function create(description, dateCreated) {
   return new Task(description, dateCreated);
 }
 function createList(description) {
-  return new TaskList(description);
+  return new TaskList(description, task => task instanceof Task);
 }
 module.exports = { create, createList };
