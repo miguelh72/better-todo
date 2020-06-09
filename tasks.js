@@ -30,46 +30,26 @@ function DescriptionMixin(superclass) {
     setDescription(description) {
       if (description == null) return false;
       this.__description__ = description;
+      return true;
     }
     
   }
 }
 
-class Test {
-  show() { return "something" }
-}
-const TestUpdatable = class extends UpdatableMixin(Test) {};
-let a = new TestUpdatable();
-console.log({TestUpdatable});
-
-function UpdatableMixin(superclass) {
-  return class extends superclass {
-    constructor(...args) {
-      super(...args);
-      for (let prop of Object
-.getOwnPropertyNames(superclass.prototype))     {
-        if (prop === "constructor") continue;
-        this[prop] = (...args) => {
-          console.log("additional functionality dynamically added")
-          return super[prop](...args);
-        }
-      }
-      /**const baseObject = Object.getPrototypeOf(new Object());
-      let prototype = Object.getPrototypeOf(this);
-      while (prototype !== baseObject) {
-        for (let prop of Object.getOwnPropertyNames(prototype)) {
-          if (prop !== "constructor") {
-            // Wrap method around call to update method
-            super[prop] = function(...args) {
-              // TODO either check if keywords such as set, add, update are in prop name and update then, or refactor 
-              //so other mixins use this update mixin first.
-            }
-          }
-        }
-        prototype = Object.getPrototypeOf(prototype);
-      }
-      */
-    }
+class Updatable {
+  
+  constructor(date = new Date()) {
+    this.__dateUpdated__ = date;
+  }
+  
+  updated(date = new Date()) {
+    if (!(date instanceof Date)) throw new Error("Type Error: update method expected a type Date argument.");
+    
+    this.__dateUpdated__ = date;
+  }
+  
+  getDateUpdated() {
+    return this.__dateUpdated__;
   }
 }
 
@@ -105,18 +85,24 @@ class ListContainer {
   }
 }
 
-class Task extends 
-  UpdatableMixin(
+class Task extends
   DescriptionMixin(
   DateCreatedMixin(
-  Object))) {}
+  Updatable)) {
+    
+    setDescription(description, dateUpdated) {
+      const result = super.setDescription(description);
+      if (result) this.updated(dateUpdated);
+      return result;
+    }
+  }
 
 class TaskList extends 
   DescriptionMixin(
   ListContainer) {}
 
 function create(description, dateCreated) {
-  return new Task(description, dateCreated);
+  return new Task(description, dateCreated, dateCreated);
 }
 function createList(description) {
   return new TaskList(description, task => task instanceof Task);

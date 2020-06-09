@@ -9,7 +9,6 @@ test("Create task with default values", () => {
   expect(task.getDateCreated() instanceof Date).toBe(true);
 });
 
-/**
 test("Create task with defined values", () => {
   const desc = "Clean and refactor code.";
   const date = new Date();
@@ -35,7 +34,6 @@ test("Update task content", () => {
 
 // TODO test taskList description
 
-/**
 test("Create list of tasks", () => {
   const taskList = tasks.createList();
   expect(taskList).toBeTruthy();
@@ -65,4 +63,3 @@ const taskList = tasks.createList();
   taskList.remove(task1);
   expect(taskList.getList()).toEqual([]);
 });
-*/
