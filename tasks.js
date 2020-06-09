@@ -35,11 +35,26 @@ function DescriptionMixin(superclass) {
   }
 }
 
+class Test {
+  show() { return "something" }
+}
+const TestUpdatable = class extends UpdatableMixin(Test) {};
+let a = new TestUpdatable();
+console.log({TestUpdatable});
+
 function UpdatableMixin(superclass) {
   return class extends superclass {
     constructor(...args) {
       super(...args);
-      const baseObject = Object.getPrototypeOf(new Object());
+      for (let prop of Object
+.getOwnPropertyNames(superclass.prototype))     {
+        if (prop === "constructor") continue;
+        this[prop] = (...args) => {
+          console.log("additional functionality dynamically added")
+          return super[prop](...args);
+        }
+      }
+      /**const baseObject = Object.getPrototypeOf(new Object());
       let prototype = Object.getPrototypeOf(this);
       while (prototype !== baseObject) {
         for (let prop of Object.getOwnPropertyNames(prototype)) {
@@ -53,6 +68,7 @@ function UpdatableMixin(superclass) {
         }
         prototype = Object.getPrototypeOf(prototype);
       }
+      */
     }
   }
 }
@@ -105,4 +121,4 @@ function create(description, dateCreated) {
 function createList(description) {
   return new TaskList(description, task => task instanceof Task);
 }
-module.exports = { create, createList };
+//module.exports = { create, createList };
