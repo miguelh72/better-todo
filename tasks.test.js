@@ -2,16 +2,22 @@ const tasks = require("./tasks.js");
 
 /** Tasks */
 
+// TODO create validation module and validation tests
+
 test("Create task with default values", () => {
   const task = tasks.create();
   expect(task).toBeTruthy();
   expect(task.getDescription()).toBe("");
   expect(task.getDateCreated() instanceof Date).toBe(true);
+  expect(task.isPriority()).toBe(false);
+  expect(task.isUrgent()).toBe(false);
+  expect(task.dueDate()).toBe(null);
 });
 
 test("Create task with defined values", () => {
   const desc = "Clean and refactor code.";
   const date = new Date();
+  
   const task = tasks.create(desc, date);
   expect(task.getDescription()).toBe(desc);
   expect(task.getDateCreated()).toBe(date);
@@ -31,8 +37,6 @@ test("Update task content", () => {
 });
 
 /** Task list */
-
-// TODO test taskList description
 
 test("Create list of tasks", () => {
   const taskList = tasks.createList();
@@ -62,4 +66,14 @@ const taskList = tasks.createList();
   expect(taskList.getList()).toEqual([]);
   taskList.remove(task1);
   expect(taskList.getList()).toEqual([]);
+});
+
+test("Task list description.", () => {
+  const listDescription = "This is a list's description.";
+  const updatedListDesc = "Updated description";
+  
+  const taskList = tasks.createList(listDescription);
+  expect(taskList.getDescription()).toEqual(listDescription);
+  taskList.setDescription(updatedListDesc);
+  expect(taskList.getDescription()).toEqual(updatedListDesc);
 });
