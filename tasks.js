@@ -119,6 +119,34 @@ function UrgencyMixin(superclass) {
     }
 }
 
+function ArchivableMixin(superclass) {
+    return class extends superclass {
+    
+        constructor({ archived = false,   completed = false }) {
+            Validate.toggle(archived);
+            Validate.toggle(completed);
+            
+            super(...arguments);
+            this.__isArchived__ = archived;
+            this.__isCompleted__ = completed;
+        }
+        
+        get archived() { return this.__isArchived__; }
+        set archived(isArchived) {
+            Validate.toggle(isArchived);
+            
+            this.__isArchived__ = isArchived;
+        }
+        
+        get completed() { return this.__isCompleted__; }
+        set completed(isCompleted) {
+            Validate.toggle(isCompleted);
+            
+            this.__isCompleted__ = isCompleted;
+        }
+    }
+}
+
 // Uptable violates dependency inversion principle. Updatable depends on consumer's implementation details.
 class Updatable {
 
@@ -171,11 +199,36 @@ class Task extends
         DateCreatedMixin(
             ImportanceMixin(
                 UrgencyMixin(
-                    Updatable)))) { }
-
+                    ArchivableMixin(
+                        Updatable))))) { }
+const TaskContainer = class extends ListContainer {
+    constructor() {
+        super({ itemValidator: Validate.task });
+    }
+}
 class TaskList extends
     DescriptionMixin(
-        ListContainer) { }
+        ArchivableMixin(
+            TaskContainer)) {
+            
+    get completed() {
+        if (this.toArray().length === 0) return true;
+        return this.toArray().every(task => task.completed);
+    }
+    set completed(isCompleted) {
+        Validate.toggle(isCompleted);
+       
+        this.toArray().forEach(task => task.completed = isCompleted);
+    }
+    
+    get archived() { return super.archived; }
+    set archived(isArchived) {
+        Validate.toggle(isArchived);
+        
+        super.archived = isArchived;
+        this.toArray().forEach(task => task.archived = isArchived);
+    }
+}
 
 function create(description, dateCreated, dueDate, isImportant, isUrgent) {
     return new Task({
@@ -190,7 +243,6 @@ function create(description, dateCreated, dueDate, isImportant, isUrgent) {
 function createList(description) {
     return new TaskList({
         description,
-        itemValidator: Validate.task,
     });
 }
 module.exports = { create, createList };

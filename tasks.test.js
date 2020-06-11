@@ -23,7 +23,7 @@ test("Create task with defined values", () => {
   const dueDate = new Date();
   dueDate.setDate(dueDate.getDate() + 1);
   
-  const task = tasks.create(desc, dateCreated, dateUpdated, dueDate, true, true);
+  const task = tasks.create(desc, dateCreated, dueDate, true, true);
   expect(task.description).toBe(desc);
   expect(task.dateCreated).toBe(dateCreated);
   expect(task.dateUpdated).toBe(dateCreated);
@@ -39,22 +39,39 @@ test("Update task content", () => {
   const updatedContent = "Clean and refactor code.";
   const date = new Date();
   const updateDate = new Date();
-  
   const task = tasks.create(content, date);
+  const dueDate = new Date();
+  dueDate.setDate(dueDate.getDate() + 1);
+  
   expect(task.dateUpdated).toBe(date);
+  
   task.description = updatedContent;
   task.dateUpdated = updateDate;
+  task.dueDate = dueDate;
+  task.urgent = true;
+  task.important = true;
+  task.completed = true;
+  task.archived = true;
+  
   expect(task.description).toBe(updatedContent);
   expect(task.dateUpdated).toBe(updateDate);
   expect(() => task.dateCreated = new Date()).toThrow();
+  expect(task.dueDate).toBe(dueDate);
+  expect(task.important).toBe(true);
+  expect(task.urgent).toBe(true);
+  expect(task.completed).toBe(true);
+  expect(task.archived).toBe(true);
 });
 
 /** Task list */
 
-test("Create list of tasks", () => {
+test("Create list of tasks with default values", () => {
   const taskList = tasks.createList();
+  
   expect(taskList).toBeTruthy();
   expect(taskList.toArray()).toEqual([]);
+  expect(taskList.completed).toBe(true); // no tasks is a completed list
+  expect(taskList.archived).toBe(false);
 });
 
 test("Add and retrieve tasks from task list", () => {
@@ -63,11 +80,14 @@ test("Add and retrieve tasks from task list", () => {
   const task2 = tasks.create();
   taskList.add(task1);
   taskList.add(task2);
+  
   expect(taskList.toArray()).toEqual([task1, task2]);
+  expect(taskList.completed).toBe(false);
+  expect(taskList.archived).toBe(false);
 });
 
 test("Remove tasks from task list", () => {
-const taskList = tasks.createList();
+  const taskList = tasks.createList();
   const task1 = tasks.create();
   const task2 = tasks.create();
   taskList.add(task1);
@@ -79,6 +99,8 @@ const taskList = tasks.createList();
   expect(taskList.toArray()).toEqual([]);
   taskList.remove(task1);
   expect(taskList.toArray()).toEqual([]);
+  expect(taskList.completed).toBe(true);
+  expect(taskList.archived).toBe(false);
 });
 
 test("Task list description.", () => {
@@ -90,3 +112,23 @@ test("Task list description.", () => {
   taskList.description = updatedListDesc;
   expect(taskList.description).toEqual(updatedListDesc);
 });
+
+test("Completing and archiving task list.", () => {
+    const taskList = tasks.createList();
+    const task1 = tasks.create();
+    const task2 = tasks.create();
+    taskList.add(task1);
+    taskList.add(task2);
+    
+    taskList.completed = true;
+    taskList.archived = true;
+    
+    expect(taskList.completed).toBe(true);
+    expect(taskList.archived).toBe(true);
+    expect(task1.completed).toBe(true);
+    expect(task1.archived).toBe(true);
+    expect(task2.completed).toBe(true);
+    expect(task2.archived).toBe(true);
+});
+
+// TODO archiving TL
