@@ -7,11 +7,11 @@ const tasks = require("./tasks.js");
 test("Create task with default values", () => {
   const task = tasks.create();
   expect(task).toBeTruthy();
-  expect(task.getDescription()).toBe("");
-  expect(task.getDateCreated() instanceof Date).toBe(true);
-  expect(task.isPriority()).toBe(false);
-  expect(task.isUrgent()).toBe(false);
-  expect(task.dueDate()).toBe(null);
+  expect(task.description).toBe("");
+  expect(task.dateCreated instanceof Date).toBe(true);
+  expect(task.important).toBe(false);
+  expect(task.urgent).toBe(false);
+  expect(task.dueDate).toBe(null);
 });
 
 test("Create task with defined values", () => {
@@ -19,8 +19,8 @@ test("Create task with defined values", () => {
   const date = new Date();
   
   const task = tasks.create(desc, date);
-  expect(task.getDescription()).toBe(desc);
-  expect(task.getDateCreated()).toBe(date);
+  expect(task.description).toBe(desc);
+  expect(task.dateCreated).toBe(date);
 });
 
 test("Update task content", () => {
@@ -30,10 +30,12 @@ test("Update task content", () => {
   const updateDate = new Date();
   
   const task = tasks.create(content, date);
-  expect(task.getDateUpdated()).toBe(date);
-  task.setDescription(updatedContent, updateDate);
-  expect(task.getDescription()).toBe(updatedContent);
-  expect(task.getDateUpdated()).toBe(updateDate);
+  expect(task.dateUpdated).toBe(date);
+  task.description = updatedContent;
+  task.dateUpdated = updateDate;
+  expect(task.description).toBe(updatedContent);
+  expect(task.dateUpdated).toBe(updateDate);
+  expect(() => task.dateCreated = new Date()).toThrow();
 });
 
 /** Task list */
@@ -41,7 +43,7 @@ test("Update task content", () => {
 test("Create list of tasks", () => {
   const taskList = tasks.createList();
   expect(taskList).toBeTruthy();
-  expect(taskList.getList()).toEqual([]);
+  expect(taskList.toArray()).toEqual([]);
 });
 
 test("Add and retrieve tasks from task list", () => {
@@ -50,7 +52,7 @@ test("Add and retrieve tasks from task list", () => {
   const task2 = tasks.create();
   taskList.add(task1);
   taskList.add(task2);
-  expect(taskList.getList()).toEqual([task1, task2]);
+  expect(taskList.toArray()).toEqual([task1, task2]);
 });
 
 test("Remove tasks from task list", () => {
@@ -61,11 +63,11 @@ const taskList = tasks.createList();
   taskList.add(task2);
   
   taskList.remove(task1);
-  expect(taskList.getList()).toEqual([task2]);
+  expect(taskList.toArray()).toEqual([task2]);
   taskList.remove(task2);
-  expect(taskList.getList()).toEqual([]);
+  expect(taskList.toArray()).toEqual([]);
   taskList.remove(task1);
-  expect(taskList.getList()).toEqual([]);
+  expect(taskList.toArray()).toEqual([]);
 });
 
 test("Task list description.", () => {
@@ -73,7 +75,7 @@ test("Task list description.", () => {
   const updatedListDesc = "Updated description";
   
   const taskList = tasks.createList(listDescription);
-  expect(taskList.getDescription()).toEqual(listDescription);
-  taskList.setDescription(updatedListDesc);
-  expect(taskList.getDescription()).toEqual(updatedListDesc);
+  expect(taskList.description).toEqual(listDescription);
+  taskList.description = updatedListDesc;
+  expect(taskList.description).toEqual(updatedListDesc);
 });
