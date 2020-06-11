@@ -9,18 +9,29 @@ test("Create task with default values", () => {
   expect(task).toBeTruthy();
   expect(task.description).toBe("");
   expect(task.dateCreated instanceof Date).toBe(true);
+  expect(task.dateUpdated instanceof Date).toBe(true);
   expect(task.important).toBe(false);
   expect(task.urgent).toBe(false);
   expect(task.dueDate).toBe(null);
+  expect(task.completed).toBe(false);
+  expect(task.archived).toBe(false);
 });
 
 test("Create task with defined values", () => {
   const desc = "Clean and refactor code.";
-  const date = new Date();
+  const dateCreated = new Date("03/19/2000");
+  const dueDate = new Date();
+  dueDate.setDate(dueDate.getDate() + 1);
   
-  const task = tasks.create(desc, date);
+  const task = tasks.create(desc, dateCreated, dateUpdated, dueDate, true, true);
   expect(task.description).toBe(desc);
-  expect(task.dateCreated).toBe(date);
+  expect(task.dateCreated).toBe(dateCreated);
+  expect(task.dateUpdated).toBe(dateCreated);
+  expect(task.dueDate).toBe(dueDate);
+  expect(task.important).toBe(true);
+  expect(task.urgent).toBe(true);
+  expect(task.completed).toBe(false);
+  expect(task.archived).toBe(false);
 });
 
 test("Update task content", () => {

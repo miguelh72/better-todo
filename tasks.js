@@ -177,11 +177,12 @@ class TaskList extends
     DescriptionMixin(
         ListContainer) { }
 
-function create(description, dateCreated, isImportant, isUrgent) {
+function create(description, dateCreated, dueDate, isImportant, isUrgent) {
     return new Task({
         description,
         dateCreated,
         dateUpdated: dateCreated,
+        dueDate,
         important: isImportant,
         urgent: isUrgent,
     });
