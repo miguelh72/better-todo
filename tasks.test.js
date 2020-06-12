@@ -129,6 +129,10 @@ test("Completing and archiving task list.", () => {
     expect(task1.archived).toBe(true);
     expect(task2.completed).toBe(true);
     expect(task2.archived).toBe(true);
+    
+    task1.completed = false;
+    expect(taskList.completed).toBe(false);
+    
+    taskList.archived = false;
+    expect(taskList.archived).toBe(false);
 });
-
-// TODO archiving TL
