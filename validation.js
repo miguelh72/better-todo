@@ -1,7 +1,8 @@
 "use strict";
 
 class Validate {
-    // TODO static lettersFollowedByDigitsRegex = /\w+\d*/i;
+    static personNameRegex = /^([^\W\d_]+\s*){1,}$/i;
+    static usernameRegex = /^[^\W\d_]+\w{2,}$/i;
 
     static date(input) {
         if (!(input instanceof Date)) throw new Error("Invalid Parameter: Date paramete must be of type Date.");
@@ -16,13 +17,13 @@ class Validate {
 
     static username(input) {
         if (typeof input !== "string") throw new Error("Invalid Parameter: Username must be of type string.");
-        // TODO check against RegEx return false
+        if (!Validate.usernameRegex.test(input)) return false;
         return true;
     }
 
     static name(input) {
         if (typeof input !== "string") throw new Error("Invalid Parameter: Name must be of type string.");
-        // TODO check against only characters
+        if (!Validate.personNameRegex.test(input)) return false;
         return true;
     }
 

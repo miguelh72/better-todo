@@ -1,9 +1,8 @@
 "use strict";
 
 const validate = require("./validation.js");
-const { date } = require("./validation.js");
 
-// TODO replace with persistent ID issuing sustem
+// TODO replace with persistent unique ID issuing system
 let lastID = 0;
 function nextAvailableID() {
     lastID++;
@@ -29,13 +28,21 @@ class User {
     }
     
     get id() { return this.__id__; }
-    // TODO prevent setting
+    set id(_) { throw new Error("Assignment Error: user ID is not updatable.") }
     
     get name() { return this.__name__; }
+    set name(name) {
+        validate.name(name);
+
+        this.__name__ = name;
+    }
     
     get dateCreated() { return this.__dateCreated__; }
-    
+    set dateCreated(_) { throw new Error("Assignment Error: user dateCreated is not updatable.") }
+
     get username() { return this.__username__; }
+    set username(_) { throw new Error("Assignment Error: username is not updatable.") }
+
 }
 
 function create(userID, username, name, dateCreated) {
