@@ -38,21 +38,19 @@ class Validate {
     }
 
     static task(input) {
-        if (input.dateCreated == null) {
-            throw new Error("Invalid Parameter: Task must implement DateCreated interface");
-        }
-        if (input.description == null) {
-            throw new Error("Invalid Parameter: Task must implement Description interface");
-        }
-        if (input.dateUpdated === undefined) {
-            throw new Error("Invalid Parameter: Task must implement Updatable interface.");
-        }
-        if (input.important == null) {
-            throw new Error("Invalid Parameter: Task must implement Importance interface.");
-        }
-        if (input.urgent == null) {
-            throw new Error("Invalid Parameter: Task must implement Urgency interface.");
-        }
+        if (input.dateCreated == null) throw new Error("Invalid Parameter: Task must implement DateCreated interface");
+        if (input.description == null) throw new Error("Invalid Parameter: Task must implement Description interface");
+        if (input.dateUpdated === undefined) throw new Error("Invalid Parameter: Task must implement Updatable interface.");
+        if (input.important == null) throw new Error("Invalid Parameter: Task must implement Importance interface.");
+        if (input.urgent == null) throw new Error("Invalid Parameter: Task must implement Urgency interface.");
+        return true;
+    }
+
+    static user(input) {
+        if (input.dateCreated == null) throw new Error("Invalid Parameter: User must implement DateCreated interface");
+        if (input.id == null) throw new Error("Invalid Parameter: User must implement UniqueID interface");
+        if (input.username === undefined) throw new Error("Invalid Parameter: User must implement Account interface");
+        if (input.name == null) throw new Error("Invalid Parameter: User must implement Nameable interface");
         return true;
     }
 }

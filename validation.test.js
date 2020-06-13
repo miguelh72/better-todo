@@ -1,5 +1,6 @@
 const validate = require("./validation.js");
 const tasks = require("./tasks.js");
+const users = require("./users.js");
 
 test("Validate date inputs", () => {
     expect(validate.date(new Date())).toBe(true);
@@ -73,4 +74,12 @@ test("Validate user name input", () => {
     expect(validate.name(".Miguel Hern")).toBe(false);
     expect(() => validate.name(new Object())).toThrow();
     expect(() => validate.name()).toThrow();
+});
+
+test("Validate User input", () => {
+    let user = users.create();
+
+    expect(validate.user(user)).toBe(true);
+    expect(() => validate.user(new Object())).toThrow();
+    expect(() => validate.user()).toThrow();
 });
