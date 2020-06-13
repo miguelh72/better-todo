@@ -27,7 +27,7 @@ class Validate {
         return true;
     }
 
-    static userDescription(input) {
+    static description(input) {
         if (typeof input !== "string") throw new Error("Invalid Parameter: Description must be of type string.");
         return true;
     }
@@ -37,12 +37,24 @@ class Validate {
         return true;
     }
 
+    // TODO consider using an isMixinName = true property and testing against it using a DRY function call with mixin to test against
     static task(input) {
         if (input.dateCreated == null) throw new Error("Invalid Parameter: Task must implement Creatable interface");
         if (input.dateUpdated === undefined) throw new Error("Invalid Parameter: Task must implement Updatable interface.");
         if (input.description == null) throw new Error("Invalid Parameter: Task must implement Description interface");
         if (input.important == null) throw new Error("Invalid Parameter: Task must implement Importance interface.");
         if (input.urgent == null) throw new Error("Invalid Parameter: Task must implement Urgency interface.");
+        if (input.archived == null) throw new Error("Invalid Parameter: Task must implement Archivable interface");
+        if (input.completed == null) throw new Error("Invalid Parameter: Task must implement Archivable interface");
+        return true;
+    }
+
+    static taskList(input) {
+        if (input.add == null) throw new Error("Invalid Parameter: Task list must implement ListContainer interface");
+        if (input.description == null) throw new Error("Invalid Parameter: Task list must implement Description interface");
+        if (input.name == null) throw new Error("Invalid Parameter: Task list must implement Nameable interface");
+        if (input.archived == null) throw new Error("Invalid Parameter: Task list must implement Archivable interface");
+        if (input.completed == null) throw new Error("Invalid Parameter: Task list must implement Archivable interface");
         return true;
     }
 

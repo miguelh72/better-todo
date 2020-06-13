@@ -14,7 +14,7 @@ class User extends mixins.mix(
 
 function create(userID, username, name = "Guest", dateCreated) {
     return new User({
-        userID,
+        uniqueID: userID,
         username,
         name,
         dateCreated,

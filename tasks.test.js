@@ -105,24 +105,32 @@ test("Remove tasks from task list", () => {
   expect(taskList.archived).toBe(false);
 });
 
-test("Create with and update task list description.", () => {
-  const listDescription = "This is a list's description.";
-  const updatedListDesc = "Updated description";
+test("Create with and try to update task list unique ID.", () => {
+  const listUID = 79454;
   
-  const taskList = tasks.createList(undefined, listDescription);
-  expect(taskList.description).toEqual(listDescription);
-  taskList.description = updatedListDesc;
-  expect(taskList.description).toEqual(updatedListDesc);
+  const taskList = tasks.createList(listUID);
+  expect(taskList.uid).toEqual(listUID);
+  expect(() => taskList.uid = 1).toThrow();
 });
 
 test("Create with and update task list name.", () => {
   const listName = "My tasklist of importance";
   const updatedListName = "My graveyard of uncompleted tasks";
   
-  const taskList = tasks.createList(listName);
+  const taskList = tasks.createList(undefined, listName);
   expect(taskList.name).toEqual(listName);
   taskList.name = updatedListName;
   expect(taskList.name).toEqual(updatedListName);
+});
+
+test("Create with and update task list description.", () => {
+  const listDescription = "This is a list's description.";
+  const updatedListDesc = "Updated description";
+  
+  const taskList = tasks.createList(undefined, undefined, listDescription);
+  expect(taskList.description).toEqual(listDescription);
+  taskList.description = updatedListDesc;
+  expect(taskList.description).toEqual(updatedListDesc);
 });
 
 test("Completing and archiving task list.", () => {

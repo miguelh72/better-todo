@@ -52,6 +52,7 @@ class TaskContainer extends ListContainer {
 
 class TaskList extends mixins.mix(
     TaskContainer,
+    mixins.uniqueID,
     mixins.Description,
     mixins.Nameable,
     mixins.Archivable,
@@ -86,8 +87,9 @@ function create(description, dateCreated, dueDate, isImportant, isUrgent) {
         urgent: isUrgent,
     });
 }
-function createList(name, description) {
+function createList(taskListID, name, description) {
     return new TaskList({
+        uniqueID: taskListID,
         name,
         description,
     });

@@ -17,19 +17,11 @@ test("Validate boolean inputs", () => {
 });
 
 test("Validate user description inputs", () => {
-    expect(validate.userDescription("This is a user's desc.")).toBe(true);
-    expect(() => validate.userDescription(new Object())).toThrow();
-    expect(() => validate.userDescription()).toThrow();
+    expect(validate.description("This is a user's desc.")).toBe(true);
+    expect(() => validate.description(new Object())).toThrow();
+    expect(() => validate.description()).toThrow();
 
 });
-
-test("Validate task input", () => {
-    const task = tasks.create();
-    
-    expect(validate.task(task)).toBe(true);
-    expect(() => validate.task(new Object())).toThrow();
-    expect(() => validate.task()).toThrow();
-})
 
 test("Validate user UID input", () => {
     expect(validate.uniqueID(5)).toBe(true);
@@ -74,6 +66,23 @@ test("Validate user name input", () => {
     expect(validate.name(".Miguel Hern")).toBe(false);
     expect(() => validate.name(new Object())).toThrow();
     expect(() => validate.name()).toThrow();
+});
+
+// TODO create incomplete mixin combinations and test below
+test("Validate task input", () => {
+    const task = tasks.create();
+    
+    expect(validate.task(task)).toBe(true);
+    expect(() => validate.task(new Object())).toThrow();
+    expect(() => validate.task()).toThrow();
+});
+
+test("Validate task list input", () => {
+    const taskList = tasks.createList(72, "my task list", "task list for my tasks");
+
+    expect(validate.taskList(taskList)).toBe(true);
+    expect(() => validate.taskList(new Object())).toThrow();
+    expect(() => validate.taskList()).toThrow();
 });
 
 test("Validate User input", () => {

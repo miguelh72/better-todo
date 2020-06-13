@@ -13,8 +13,8 @@ test("Create users with default values", () => {
 });
 
 test("Create user with custom values", () => {
-    const mike = {id: 1, username: "mike72", name: "Mike Hern", date: new Date()};
-    const john = {id: 2, username: "johndoe", name: "John Doe", date: new Date("01/01/2019")};
+    const mike = {id: 57, username: "mike72", name: "Mike Hern", date: new Date()};
+    const john = {id: 62, username: "johndoe", name: "John Doe", date: new Date("01/01/2019")};
 
     const mikeUsr = users.create(mike.uid, mike.username, mike.name, mike.date);
     const johnUsr = users.create(john.uid, john.username, john.name, john.date);

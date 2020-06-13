@@ -97,7 +97,7 @@ function Description(superclass) {
     return class extends superclass {
 
         constructor({ description = "" } = {}) {
-            validate.userDescription(description);
+            validate.description(description);
 
             super(...arguments);
             this.__description__ = description;
@@ -106,7 +106,7 @@ function Description(superclass) {
         get description() { return this.__description__; }
         set description(description) {
             if (description == null) return false;
-            validate.userDescription(description);
+            validate.description(description);
 
             this.__description__ = description;
             return true;
