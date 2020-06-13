@@ -113,7 +113,7 @@ function ArchivableMixin(superclass) {
 
 class Updatable {
 
-    constructor({ dateUpdated = new Date() }) {
+    constructor({ dateUpdated = new Date() } = {}) {
         validate.date(dateUpdated);
 
         this.__dateUpdated__ = dateUpdated;
@@ -129,7 +129,7 @@ class Updatable {
 
 class ListContainer {
 
-    constructor({ itemValidator = () => true }) {
+    constructor({ itemValidator = () => true } = {}) {
         this.__list__ = [];
         this.__isValid__ = itemValidator;
     }

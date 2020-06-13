@@ -1,9 +1,28 @@
 "use strict";
 
 class Validate {
+    // TODO static lettersFollowedByDigitsRegex = /\w+\d*/i;
 
     static date(input) {
         if (!(input instanceof Date)) throw new Error("Invalid Parameter: Date paramete must be of type Date.");
+        return true;
+    }
+
+    static userID(input) {
+        if (typeof input !== "number") throw new Error("Invalid Parameter: User ID must be of type number.");
+        if (!Number.isInteger(input)) throw new Error("Invalid Parameter: User ID must be an integer number.");
+        return true;
+    }
+
+    static username(input) {
+        if (typeof input !== "string") throw new Error("Invalid Parameter: Username must be of type string.");
+        // TODO check against RegEx return false
+        return true;
+    }
+
+    static name(input) {
+        if (typeof input !== "string") throw new Error("Invalid Parameter: Name must be of type string.");
+        // TODO check against only characters
         return true;
     }
 
