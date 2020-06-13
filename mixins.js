@@ -7,10 +7,10 @@ function mix(baseClass, ...mixins) {
     return mixins.reduce((base, mixin) => mixin(base), baseClass);
 }
 
-function DateCreated(superclass) {
+function Creatable(superclass) {
     return class extends superclass {
 
-        constructor({ dateCreated = new Date() }) {
+        constructor({ dateCreated = new Date() } = {}) {
             validate.date(dateCreated);
 
             super(...arguments);
@@ -22,9 +22,62 @@ function DateCreated(superclass) {
     }
 }
 
+function Updatable(superclass) {
+    return class extends superclass {
+
+        constructor({ dateUpdated = new Date() } = {}) {
+            validate.date(dateUpdated);
+
+            super(...arguments);
+            this.__dateUpdated__ = dateUpdated;
+        }
+
+        get dateUpdated() { return this.__dateUpdated__; }
+        set dateUpdated(date) {
+            validate.date(date);
+
+            this.__dateUpdated__ = date;
+        }
+    }
+}
+
+// TODO replace with persistent unique ID issuing system
+let lastID = 0;
+function nextAvailableID() {
+    lastID++;
+    return lastID;
+}
+function uniqueID(superclass) {
+    return class extends superclass {
+        constructor({ uniqueID = nextAvailableID() }) {
+            validate.uniqueID(uniqueID);
+
+            super(...arguments);
+            this.__uniqueID__ = uniqueID;
+        }
+
+        get uid() { return this.__uniqueID__; }
+        set uid(_) { throw new Error("Assignment Error: unique ID is not updatable.") }
+    }
+}
+
+function Account(superclass) {
+    return class extends superclass {
+        constructor({ username = null } = {}) {
+            if (username != null) validate.username(username);
+
+            super(...arguments);
+            this.__username__ = username;
+        }
+
+        get username() { return this.__username__; }
+        set username(_) { throw new Error("Assignment Error: username is not updatable.") }
+    }
+}
+
 function Nameable(superclass) {
     return class extends superclass {
-        constructor({ name = "Unnamed" }) {
+        constructor({ name = "Unnamed" } = {}) {
             validate.name(name);
 
             super(...arguments);
@@ -43,7 +96,7 @@ function Nameable(superclass) {
 function Description(superclass) {
     return class extends superclass {
 
-        constructor({ description = "" }) {
+        constructor({ description = "" } = {}) {
             validate.userDescription(description);
 
             super(...arguments);
@@ -64,7 +117,7 @@ function Description(superclass) {
 function Importance(superclass) {
     return class extends superclass {
 
-        constructor({ important = false }) {
+        constructor({ important = false } = {}) {
             validate.toggle(important);
 
             super(...arguments);
@@ -82,7 +135,7 @@ function Importance(superclass) {
 
 function Urgency(superclass) {
     return class extends superclass {
-        constructor({ urgent = false, dueDate = null }) {
+        constructor({ urgent = false, dueDate = null } = {}) {
             validate.toggle(urgent);
 
             super(...arguments);
@@ -109,7 +162,7 @@ function Urgency(superclass) {
 function Archivable(superclass) {
     return class extends superclass {
 
-        constructor({ archived = false, completed = false }) {
+        constructor({ archived = false, completed = false } = {}) {
             validate.toggle(archived);
             validate.toggle(completed);
 
@@ -136,7 +189,10 @@ function Archivable(superclass) {
 
 module.exports = {
     mix,
-    DateCreated,
+    uniqueID,
+    Account,
+    Creatable,
+    Updatable,
     Nameable,
     Description,
     Importance,

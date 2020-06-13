@@ -70,6 +70,8 @@ test("Create list of tasks with default values", () => {
   
   expect(taskList).toBeTruthy();
   expect(taskList.toArray()).toEqual([]);
+  expect(taskList.description).toBe("");
+  expect(taskList.name).toBe("Unnamed");
   expect(taskList.completed).toBe(true); // no tasks is a completed list
   expect(taskList.archived).toBe(false);
 });
@@ -103,14 +105,24 @@ test("Remove tasks from task list", () => {
   expect(taskList.archived).toBe(false);
 });
 
-test("Task list description.", () => {
+test("Create with and update task list description.", () => {
   const listDescription = "This is a list's description.";
   const updatedListDesc = "Updated description";
   
-  const taskList = tasks.createList(listDescription);
+  const taskList = tasks.createList(undefined, listDescription);
   expect(taskList.description).toEqual(listDescription);
   taskList.description = updatedListDesc;
   expect(taskList.description).toEqual(updatedListDesc);
+});
+
+test("Create with and update task list name.", () => {
+  const listName = "My tasklist of importance";
+  const updatedListName = "My graveyard of uncompleted tasks";
+  
+  const taskList = tasks.createList(listName);
+  expect(taskList.name).toEqual(listName);
+  taskList.name = updatedListName;
+  expect(taskList.name).toEqual(updatedListName);
 });
 
 test("Completing and archiving task list.", () => {

@@ -32,11 +32,11 @@ test("Validate task input", () => {
 })
 
 test("Validate user UID input", () => {
-    expect(validate.userID(5)).toBe(true);
-    expect(() => validate.userID(2.3)).toThrow();
-    expect(() => validate.userID("5")).toThrow();
-    expect(() => validate.userID(new Object())).toThrow();
-    expect(() => validate.userID()).toThrow();
+    expect(validate.uniqueID(5)).toBe(true);
+    expect(() => validate.uniqueID(2.3)).toThrow();
+    expect(() => validate.uniqueID("5")).toThrow();
+    expect(() => validate.uniqueID(new Object())).toThrow();
+    expect(() => validate.uniqueID()).toThrow();
 });
 
 test("Validate username input", () => {

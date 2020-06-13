@@ -3,22 +3,6 @@
 const validate = require("./validation.js");
 const mixins = require("./mixins.js");
 
-class Updatable {
-
-    constructor({ dateUpdated = new Date() } = {}) {
-        validate.date(dateUpdated);
-
-        this.__dateUpdated__ = dateUpdated;
-    }
-
-    get dateUpdated() { return this.__dateUpdated__; }
-    set dateUpdated(date) {
-        validate.date(date);
-
-        this.__dateUpdated__ = date;
-    }
-}
-
 class ListContainer {
 
     constructor({ itemValidator = () => true } = {}) {
@@ -50,8 +34,9 @@ class ListContainer {
 }
 
 class Task extends mixins.mix(
-    Updatable,
-    mixins.DateCreated,
+    Object,
+    mixins.Creatable,
+    mixins.Updatable,
     mixins.Description,
     mixins.Importance,
     mixins.Urgency,
@@ -68,6 +53,7 @@ class TaskContainer extends ListContainer {
 class TaskList extends mixins.mix(
     TaskContainer,
     mixins.Description,
+    mixins.Nameable,
     mixins.Archivable,
 ) {
 
@@ -100,8 +86,9 @@ function create(description, dateCreated, dueDate, isImportant, isUrgent) {
         urgent: isUrgent,
     });
 }
-function createList(description) {
+function createList(name, description) {
     return new TaskList({
+        name,
         description,
     });
 }
