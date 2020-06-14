@@ -3,60 +3,65 @@
 const persistence = require("./persistence.js");
 const users = require("./users.js");
 const tasks = require("./tasks.js");
-const { task } = require("./validation.js");
 
 /** Users */
 
-test("Save and retrieve new user.", () => {
+test("Save and retrieve new user.", async () => {
     const user = users.create();
     const userID = user.uid;
 
-    expect(persistence.saveUser(user)).toBe(true);
-    expect(persistence.getUser(userID)).toEqual(user);
+    await expect(persistence.saveUser(user)).resolves.toBe(true);
+    await expect(persistence.getUser(userID)).resolves.toEqual(user);
 });
 
-test("Attempt to retrieve user that doesnt exist", () => {
+test("Attempt to retrieve user that doesnt exist", async () => {
     const fakeID = 99999999;
 
-    expect(persistence.getUser(fakeID)).toBe(undefined);
-    expect(() => persistence.getUser()).toThrow();
+    await expect(persistence.getUser(fakeID)).rejects.toThrow(/Missing Resource/);
+    await expect(persistence.getUser()).rejects.toThrow(/Invalid Parameter/);
 });
 
-test("Save and retrieve multiple users", () => {
+test("Save and retrieve multiple users", async() => {
     const numUsers = 100;
 
     const userList = [...Array(numUsers).keys()].map(uid => users.create(uid));
-    userList.forEach(user => persistence.saveUser(user));
     
-    userList.forEach((user, uid) => {
-        expect(persistence.getUser(uid)).toEqual(user);
-    });
+    for (let user of userList) {
+        await expect(persistence.saveUser(user)).resolves.toBe(true);
+    }
+
+    for (let user of userList) {
+        await expect(persistence.getUser(user.uid)).resolves.toEqual(user);
+    }
 });
 
 /** Task Lists */
 
-test("Save and retrieve new task list", () => {
+test("Save and retrieve new task list", async () => {
     const taskList = tasks.createList();
     const taskListUID = taskList.uid;
 
-    expect(persistence.saveTaskList(taskList)).toBe(true);
-    expect(persistence.getTaskList(taskListUID)).toEqual(taskList);
+    await expect(persistence.saveTaskList(taskList)).resolves.toBe(true);
+    await expect(persistence.getTaskList(taskListUID)).resolves.toEqual(taskList);
 });
 
-test("Attempt to retrieve task list that doesnt exist", () => {
+test("Attempt to retrieve task list that doesnt exist", async () => {
     const fakeID = 99999999;
 
-    expect(persistence.getTaskList(fakeID)).toBe(undefined);
-    expect(() => persistence.getTaskList()).toThrow();
+    await expect(persistence.getTaskList(fakeID)).rejects.toThrow(/Missing Resource/);
+    await expect(persistence.getTaskList()).rejects.toThrow(/Invalid Parameter/);
 });
 
-test("Save and retrieve multiple task lists", () => {
+test("Save and retrieve multiple task lists", async () => {
     const numTaskLists = 100;
 
     const taskListArray = [...Array(numTaskLists).keys()].map(uid => tasks.createList(uid));
-    taskListArray.forEach(taskList => persistence.saveTaskList(taskList));
     
-    taskListArray.forEach((taskList, uid) => {
-        expect(persistence.getTaskList(uid)).toEqual(taskList);
-    });
+    for (let taskList of taskListArray) {
+        await expect(persistence.saveTaskList(taskList)).resolves.toBe(true);
+    }
+
+    for (let taskList of taskListArray) {
+        await expect(persistence.getTaskList(taskList.uid)).resolves.toEqual(taskList);
+    }
 });
