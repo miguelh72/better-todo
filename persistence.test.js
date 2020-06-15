@@ -22,16 +22,9 @@ async function testUniqueIDFactory(asyncGetFunc) {
     }
 }
 
-test("Get next available unique user ID", async () => {
-    await testUniqueIDFactory(persistence.asyncGetUniqueUserID);
-});
-
 test("Get next available unique task list ID", async () => {
     await testUniqueIDFactory(persistence.asyncGetUniqueTaskListID);
-    // TODO implement above factory
 });
-
-// TODO test one uniqueID factory does not interfere with another
 
 /** Users */
 
@@ -53,7 +46,7 @@ test("Attempt to retrieve user that doesnt exist", async () => {
 test("Save and retrieve multiple users", async() => {
     const numUsers = 100;
 
-    const userList = [...Array(numUsers).keys()].map(uid => users.create(uid));
+    const userList = [...Array(numUsers).keys()].map(uid => users.create("username" + uid));
     
     for (let user of userList) {
         await expect(persistence.asyncSaveUser(user)).resolves.toBe(true);
@@ -68,7 +61,7 @@ test("Save and remove users", async () => {
     const numUsers = 100;
     const indexUsersToRemove = [0,1,5,7,47,99];
 
-    const userList = [...Array(numUsers).keys()].map(uid => users.create(uid));
+    const userList = [...Array(numUsers).keys()].map(uid => users.create("username" + uid));
     
     for (let user of userList) {
         await expect(persistence.asyncSaveUser(user)).resolves.toBe(true);
@@ -202,7 +195,7 @@ test("Save and remove user's list table", async () => {
     const numTaskListsPerTable = 10;
     const indexListTablesToRemove = [0,1,5,7,9];
 
-    const userArray = [...Array(numListTables).keys()].map(uid => users.create(uid));
+    const userArray = [...Array(numListTables).keys()].map(uid => users.create("username" + uid));
     const listTableArray = userArray.map(user => {
         const taskLists = [...Array(numTaskListsPerTable).keys()].map(_ => tasks.createList());
         return persistence.createListTable(user, taskLists);
@@ -228,9 +221,9 @@ test("Save and remove user's list table", async () => {
 });
 
 test("Attempt to retrieve list table that doesnt exist", async () => {
-    const fakeID = 99999999;
+    const fakeUserID = "mike99999999";
 
-    const fakeUser = users.create(fakeID);
+    const fakeUser = users.create(fakeUserID);
 
     await expect(persistence.asyncGetListTable(fakeUser)).rejects.toThrow(/Missing Resource/);
     await expect(new Promise((resolve, reject) => {

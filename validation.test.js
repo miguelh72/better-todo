@@ -40,15 +40,15 @@ test("Validate username input", () => {
     expect(validate.username("mikeHern")).toBe(true);
     expect(validate.username("mikeHern72")).toBe(true);
 
-    expect(validate.username("72mike72")).toBe(false);
-    expect(validate.username("mike 72")).toBe(false);
-    expect(validate.username("mike hern")).toBe(false);
-    expect(validate.username("mike!")).toBe(false);
-    expect(validate.username("!mike")).toBe(false);
-    expect(validate.username("mike.")).toBe(false);
-    expect(validate.username(".mike")).toBe(false);
-    expect(validate.username("724545")).toBe(false);
-    expect(validate.username("he")).toBe(false);
+    expect(() => validate.username("72mike72")).toThrow(/Invalid Format/);
+    expect(() => validate.username("mike 72")).toThrow(/Invalid Format/);
+    expect(() => validate.username("mike hern")).toThrow(/Invalid Format/);
+    expect(() => validate.username("mike!")).toThrow(/Invalid Format/);
+    expect(() => validate.username("!mike")).toThrow(/Invalid Format/);
+    expect(() => validate.username("mike.")).toThrow(/Invalid Format/);
+    expect(() => validate.username(".mike")).toThrow(/Invalid Format/);
+    expect(() => validate.username("724545")).toThrow(/Invalid Format/);
+    expect(() => validate.username("he")).toThrow(/Invalid Format/);
 
     expect(() => validate.username(new Object())).toThrow(/Invalid Parameter/);
     expect(() => validate.username()).toThrow(/Invalid Parameter/);
@@ -57,15 +57,17 @@ test("Validate username input", () => {
 test("Validate user name input", () => {
     expect(validate.name("Miguel")).toBe(true);
     expect(validate.name("Miguel Hern")).toBe(true);
-    expect(validate.name("Miguel72")).toBe(false);
-    expect(validate.name("Miguel!")).toBe(false);
-    expect(validate.name("!Miguel")).toBe(false);
-    expect(validate.name("Miguel_Hern")).toBe(false);
-    expect(validate.name("7Miguel")).toBe(false);
-    expect(validate.name("Miguel Hern7")).toBe(false);
-    expect(validate.name("Miguel Hern?")).toBe(false);
-    expect(validate.name("Miguel.")).toBe(false);
-    expect(validate.name(".Miguel Hern")).toBe(false);
+
+    expect(() => validate.name("Miguel72")).toThrow(/Invalid Format/);
+    expect(() => validate.name("Miguel!")).toThrow(/Invalid Format/);
+    expect(() => validate.name("!Miguel")).toThrow(/Invalid Format/);
+    expect(() => validate.name("Miguel_Hern")).toThrow(/Invalid Format/);
+    expect(() => validate.name("7Miguel")).toThrow(/Invalid Format/);
+    expect(() => validate.name("Miguel Hern7")).toThrow(/Invalid Format/);
+    expect(() => validate.name("Miguel Hern?")).toThrow(/Invalid Format/);
+    expect(() => validate.name("Miguel.")).toThrow(/Invalid Format/);
+    expect(() => validate.name(".Miguel Hern")).toThrow(/Invalid Format/);
+
     expect(() => validate.name(new Object())).toThrow(/Invalid Parameter/);
     expect(() => validate.name()).toThrow(/Invalid Parameter/);
 });

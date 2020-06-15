@@ -12,9 +12,9 @@ class User extends mixins.mix(
     mixins.Nameable,
 ) { }
 
-function create(userID, username, name = "Guest", dateCreated) {
+function create(username, name = "Guest", dateCreated) {
     return new User({
-        uniqueID: userID,
+        uniqueID: username,
         username,
         name,
         dateCreated,

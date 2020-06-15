@@ -13,11 +13,11 @@ test("Create users with default values", () => {
 });
 
 test("Create user with custom values", () => {
-    const mike = {id: 57, username: "mike72", name: "Mike Hern", date: new Date()};
-    const john = {id: 62, username: "johndoe", name: "John Doe", date: new Date("01/01/2019")};
+    const mike = {username: "mike72", name: "Mike Hern", date: new Date()};
+    const john = {username: "johndoe", name: "John Doe", date: new Date("01/01/2019")};
 
-    const mikeUsr = users.create(mike.uid, mike.username, mike.name, mike.date);
-    const johnUsr = users.create(john.uid, john.username, john.name, john.date);
+    const mikeUsr = users.create(mike.username, mike.name, mike.date);
+    const johnUsr = users.create(john.username, john.name, john.date);
 
     expect(mikeUsr.uid).not.toBe(johnUsr.uid);
     expect(mikeUsr.username).toBe(mike.username);
@@ -35,9 +35,9 @@ test("Create user with custom values", () => {
 });
 
 test("Edit user attributes.", () => {
-    const mike = { id: 1, username: "mike72", name: "Mike Hern", date: new Date() };
+    const mike = { username: "mike72", name: "Mike Hern", date: new Date() };
     const mikeUpdated = { name: "Miguel Hernandez" };
-    const mikeUsr = users.create(mike.uid, mike.username, mike.name, mike.date);
+    const mikeUsr = users.create(mike.username, mike.name, mike.date);
 
     mikeUsr.name = mikeUpdated.name;
     expect(mikeUsr.name).toBe(mikeUpdated.name);
@@ -45,8 +45,8 @@ test("Edit user attributes.", () => {
 });
 
 test("Preventing setting permanent attributes", () => {
-    const mike = {id: 1, username: "mike72", name: "Mike Hern", date: new Date()};
-    const mikeUsr = users.create(mike.uid, mike.username, mike.name, mike.date);
+    const mike = {username: "mike72", name: "Mike Hern", date: new Date()};
+    const mikeUsr = users.create(mike.username, mike.name, mike.date);
 
     expect(() => mikeUsr.uid = 3).toThrow();
     expect(() => mikeUsr.username = "johnny").toThrow();

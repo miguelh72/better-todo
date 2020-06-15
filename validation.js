@@ -10,20 +10,29 @@ class Validate {
     }
 
     static uniqueID(input) {
-        if (typeof input !== "number") throw new Error("Invalid Parameter: User ID must be of type number.");
-        if (!Number.isInteger(input)) throw new Error("Invalid Parameter: User ID must be an integer number.");
+        if (typeof input === "string") {
+            Validate.username(input);
+        } else if (typeof input !== "number") {
+            throw new Error("Invalid Parameter: unique ID must be of type number or string.");
+        } else {
+            if (!Number.isInteger(input)) throw new Error("Invalid Parameter: unique ID must be an integer number.");
+        }
         return true;
     }
 
     static username(input) {
         if (typeof input !== "string") throw new Error("Invalid Parameter: Username must be of type string.");
-        if (!Validate.usernameRegex.test(input)) return false;
+        if (!Validate.usernameRegex.test(input))
+            throw new Error("Invalid Format: Username must contain only letters and numbers, start with a letter, and"
+                + " be at least 3 characters long.");
         return true;
     }
 
     static name(input) {
         if (typeof input !== "string") throw new Error("Invalid Parameter: Name must be of type string.");
-        if (!Validate.personNameRegex.test(input)) return false;
+        if (!Validate.personNameRegex.test(input))
+            throw new Error("Invalid Format: Name must contain only letters and spaces, start with a letter, and"
+                + " be at least 2 characters long.");
         return true;
     }
 
@@ -58,7 +67,7 @@ class Validate {
     }
 
     static taskList(input) {
-        return Validate.containsMixin(input, "TaskList", 
+        return Validate.containsMixin(input, "TaskList",
             "ListContainer",
             "UniqueID",
             "Description",

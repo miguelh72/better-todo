@@ -96,7 +96,7 @@ class ListTable extends mixins.UniqueID(Object) {
     set length(_) { throw new Error("Assignment Error: length is not updatable.") }
 }
 
-async function asyncGetUniqueUserID() { return virtualUserDB.nextUniqueID(); }
+async function asyncGetUniqueTaskListID() { return virtualTaskListDB.nextUniqueID(); }
 
 async function asyncSaveUser(user) { return savePromise(virtualUserDB, validate.user, user); }
 async function asyncGetUser(uid) { return retrievePromise(virtualUserDB, uid) }
@@ -120,7 +120,7 @@ async function asyncRemoveListTable(user) {
 }
 
 module.exports = {
-    asyncGetUniqueUserID,
+    asyncGetUniqueTaskListID,
 
     asyncSaveUser,
     asyncGetUser,

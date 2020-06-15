@@ -7,8 +7,10 @@ function mix(baseClass, ...mixins) {
     return mixins.reduce((base, mixin) => mixin(base), baseClass);
 }
 
+// TODO create error module. Create constructor functions that require expected and received and print useful message.
+
 function Creatable(superclass) {
-    return class extends superclass {
+    return class Creatable extends superclass {
 
         constructor({ dateCreated = new Date() } = {}) {
             validate.date(dateCreated);
@@ -24,7 +26,7 @@ function Creatable(superclass) {
 }
 
 function Updatable(superclass) {
-    return class extends superclass {
+    return class Updatable extends superclass {
 
         constructor({ dateUpdated = new Date() } = {}) {
             validate.date(dateUpdated);
@@ -50,7 +52,7 @@ function nextAvailableID() {
     return lastID;
 }
 function UniqueID(superclass) {
-    return class extends superclass {
+    return class UniqueID extends superclass {
         constructor({ uniqueID = nextAvailableID() } = {}) {
             validate.uniqueID(uniqueID);
 
@@ -65,7 +67,7 @@ function UniqueID(superclass) {
 }
 
 function Account(superclass) {
-    return class extends superclass {
+    return class Account extends superclass {
         constructor({ username = null } = {}) {
             if (username != null) validate.username(username);
 
@@ -80,7 +82,7 @@ function Account(superclass) {
 }
 
 function Nameable(superclass) {
-    return class extends superclass {
+    return class Nameable extends superclass {
         constructor({ name = "Unnamed" } = {}) {
             validate.name(name);
 
@@ -99,7 +101,7 @@ function Nameable(superclass) {
 }
 
 function Description(superclass) {
-    return class extends superclass {
+    return class Description extends superclass {
 
         constructor({ description = "" } = {}) {
             validate.description(description);
@@ -121,7 +123,7 @@ function Description(superclass) {
 }
 
 function Importance(superclass) {
-    return class extends superclass {
+    return class Importance extends superclass {
 
         constructor({ important = false } = {}) {
             validate.toggle(important);
@@ -141,7 +143,7 @@ function Importance(superclass) {
 }
 
 function Urgency(superclass) {
-    return class extends superclass {
+    return class Urgency extends superclass {
         constructor({ urgent = false, dueDate = null } = {}) {
             validate.toggle(urgent);
 
@@ -168,7 +170,7 @@ function Urgency(superclass) {
 }
 
 function Archivable(superclass) {
-    return class extends superclass {
+    return class Archivable extends superclass {
 
         constructor({ archived = false, completed = false } = {}) {
             validate.toggle(archived);
