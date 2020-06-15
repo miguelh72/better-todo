@@ -3,6 +3,7 @@
 const validate = require("./validation.js");
 const mixins = require("./mixins.js");
 
+// TODO make this mock DB return copies instead of reference to original in DB
 class UniqueIDObjSaver {
     
     constructor() {
@@ -19,10 +20,18 @@ class UniqueIDObjSaver {
         return this.__virtualDB__[uniqueID];
     }
 
+    retrieveAll() {
+        return Object.values(this.__virtualDB__);
+    }
+
     remove(uniqueID) {
         if (this.__virtualDB__[uniqueID] == null) return false;
         delete this.__virtualDB__[uniqueID];
         return true;
+    }
+
+    contains(uniqueID) {
+        return this.__virtualDB__[uniqueID] != null;
     }
 
     nextUniqueID() {
@@ -45,6 +54,10 @@ async function retrievePromise(db, uid) {
     const saveable = db.retrieve(uid);
     if (saveable == null) throw new Error("Missing Resource: Resource does not exist");
     return saveable;      
+}
+
+async function retrieveAllPromise(db) {
+    return db.retrieveAll();
 }
 
 async function removePromise(db, uid) {
@@ -98,8 +111,12 @@ class ListTable extends mixins.UniqueID(Object) {
 
 async function asyncGetUniqueTaskListID() { return virtualTaskListDB.nextUniqueID(); }
 
-async function asyncSaveUser(user) { return savePromise(virtualUserDB, validate.user, user); }
+async function asyncSaveUser(user) { 
+    if (virtualUserDB.contains(user.uid)) throw new Error("Existing Username: Another user already has that username.");
+    return savePromise(virtualUserDB, validate.user, user); 
+}
 async function asyncGetUser(uid) { return retrievePromise(virtualUserDB, uid) }
+async function asyncGetAllUsers() { return retrieveAllPromise(virtualUserDB) }
 async function asyncRemoveUser(uid) { return removePromise(virtualUserDB, uid) }
 
 async function asyncSaveTaskList(taskList) { return savePromise(virtualTaskListDB, validate.taskList, taskList) }
@@ -124,6 +141,7 @@ module.exports = {
 
     asyncSaveUser,
     asyncGetUser,
+    asyncGetAllUsers,
     asyncRemoveUser,
 
     asyncSaveTaskList,

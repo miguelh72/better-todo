@@ -29,7 +29,7 @@ test("Get next available unique task list ID", async () => {
 /** Users */
 
 test("Save and retrieve new user.", async () => {
-    const user = users.create();
+    const user = users.create("mike72");
     const userID = user.uid;
 
     await expect(persistence.asyncSaveUser(user)).resolves.toBe(true);
@@ -43,7 +43,7 @@ test("Attempt to retrieve user that doesnt exist", async () => {
     await expect(persistence.asyncGetUser()).rejects.toThrow(/Invalid Parameter/);
 });
 
-test("Save and retrieve multiple users", async() => {
+test("Save, retrieve, and remove multiple users", async() => {
     const numUsers = 100;
 
     const userList = [...Array(numUsers).keys()].map(uid => users.create("username" + uid));
@@ -54,6 +54,11 @@ test("Save and retrieve multiple users", async() => {
 
     for (let user of userList) {
         await expect(persistence.asyncGetUser(user.uid)).resolves.toEqual(user);
+    }
+
+    // Cleanup for rest of tests
+    for (let user of userList) {
+        await persistence.asyncRemoveUser(user.uid);
     }
 });
 
@@ -81,7 +86,7 @@ test("Save and remove users", async () => {
 /** Task Lists */
 
 test("Save and retrieve new task list", async () => {
-    const taskList = tasks.createList();
+    const taskList = tasks.createList(1);
     const taskListUID = taskList.uid;
 
     await expect(persistence.asyncSaveTaskList(taskList)).resolves.toBe(true);
@@ -135,8 +140,8 @@ test("Save and remove task lists", async () => {
 test("Create list table", () => {
     const numTaskLists = 5;
 
-    const user = users.create();
-    const taskListArray = [...Array(numTaskLists).keys()].map(_ => tasks.createList());
+    const user = users.create("mike72");
+    const taskListArray = [...Array(numTaskLists).keys()].map((_, uid) => tasks.createList(uid));
     const listTable = persistence.createListTable(user, taskListArray);
 
     expect(listTable.userID).toBe(user.uid);
@@ -150,8 +155,8 @@ test("Add and remove from list table", () => {
     const taskListToAdd = tasks.createList(72);
     const taskListIndexToRemove = 1;
 
-    const user = users.create();
-    const taskListArray = [...Array(numTaskLists).keys()].map(_ => tasks.createList());
+    const user = users.create("mike72");
+    const taskListArray = [...Array(numTaskLists).keys()].map((_, uid) => tasks.createList(uid));
     const listTable = persistence.createListTable(user, taskListArray);
 
     taskListArray.push(taskListToAdd);
@@ -168,8 +173,8 @@ test("Add and remove from list table", () => {
 test("Save user's list table", async () => {
     const numTaskLists = 10;
 
-    const user = users.create();
-    const taskListArray = [...Array(numTaskLists).keys()].map(_ => tasks.createList());
+    const user = users.create("mike72");
+    const taskListArray = [...Array(numTaskLists).keys()].map((_, uid) => tasks.createList(uid));
     const listTable = persistence.createListTable(user, taskListArray);
 
     await expect(persistence.asyncSaveListTable(listTable)).resolves.toBe(true);
@@ -178,8 +183,8 @@ test("Save user's list table", async () => {
 test("Save and retrieve user's list table", async () => {
     const numTaskLists = 10;
 
-    const user = users.create();
-    const taskListArray = [...Array(numTaskLists).keys()].map(_ => tasks.createList());
+    const user = users.create("mike72");
+    const taskListArray = [...Array(numTaskLists).keys()].map((_, uid) => tasks.createList(uid));
     const listTable = persistence.createListTable(user, taskListArray);
 
     await expect(persistence.asyncSaveListTable(listTable)).resolves.toBe(true);
@@ -196,8 +201,8 @@ test("Save and remove user's list table", async () => {
     const indexListTablesToRemove = [0,1,5,7,9];
 
     const userArray = [...Array(numListTables).keys()].map(uid => users.create("username" + uid));
-    const listTableArray = userArray.map(user => {
-        const taskLists = [...Array(numTaskListsPerTable).keys()].map(_ => tasks.createList());
+    const listTableArray = userArray.map((user, uid) => {
+        const taskLists = [...Array(numTaskListsPerTable).keys()].map(_ => tasks.createList(uid));
         return persistence.createListTable(user, taskLists);
     });
     

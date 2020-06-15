@@ -46,14 +46,9 @@ function Updatable(superclass) {
 }
 
 // TODO replace with persistent unique ID issuing system
-let lastID = 0;
-function nextAvailableID() {
-    lastID++;
-    return lastID;
-}
 function UniqueID(superclass) {
     return class UniqueID extends superclass {
-        constructor({ uniqueID = nextAvailableID() } = {}) {
+        constructor({ uniqueID } = {}) {
             validate.uniqueID(uniqueID);
 
             super(...arguments);

@@ -1,14 +1,14 @@
 const users = require("./users.js");
 
 test("Create users with default values", () => {
-    const user1 = users.create();
-    const user2 = users.create();
+    const user1 = users.create("mike72");
+    const user2 = users.create("john72");
     
-    expect(typeof user1.uid).toBe("number");
+    expect(typeof user1.uid).toBe("string");
     expect(user1.uid).not.toBe(user2.uid);
     expect(user1.dateCreated instanceof Date).toBe(true);
     expect(user1.dateUpdated instanceof Date).toBe(true);
-    expect(user1.username).toBe(null);
+    expect(user1.username).toBe("mike72");
     expect(user1.name).toBe("Guest");
 });
 

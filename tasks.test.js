@@ -64,7 +64,7 @@ test("Update task content", () => {
 /** Task list */
 
 test("Create list of tasks with default values", () => {
-  const taskList = tasks.createList();
+  const taskList = tasks.createList(1);
   
   expect(taskList).toBeTruthy();
   expect(taskList.toArray()).toEqual([]);
@@ -76,7 +76,7 @@ test("Create list of tasks with default values", () => {
 });
 
 test("Add and retrieve tasks from task list", () => {
-  const taskList = tasks.createList();
+  const taskList = tasks.createList(1);
   const task1 = tasks.create();
   const task2 = tasks.create();
   taskList.add(task1);
@@ -89,7 +89,7 @@ test("Add and retrieve tasks from task list", () => {
 });
 
 test("Remove tasks from task list", () => {
-  const taskList = tasks.createList();
+  const taskList = tasks.createList(1);
   const task1 = tasks.create();
   const task2 = tasks.create();
   taskList.add(task1);
@@ -119,7 +119,7 @@ test("Create with and update task list name.", () => {
   const listName = "My tasklist of importance";
   const updatedListName = "My graveyard of uncompleted tasks";
   
-  const taskList = tasks.createList(undefined, listName);
+  const taskList = tasks.createList(1, listName);
   expect(taskList.name).toEqual(listName);
   taskList.name = updatedListName;
   expect(taskList.name).toEqual(updatedListName);
@@ -129,14 +129,14 @@ test("Create with and update task list description.", () => {
   const listDescription = "This is a list's description.";
   const updatedListDesc = "Updated description";
   
-  const taskList = tasks.createList(undefined, undefined, listDescription);
+  const taskList = tasks.createList(1, undefined, listDescription);
   expect(taskList.description).toEqual(listDescription);
   taskList.description = updatedListDesc;
   expect(taskList.description).toEqual(updatedListDesc);
 });
 
 test("Completing and archiving task list.", () => {
-    const taskList = tasks.createList();
+    const taskList = tasks.createList(1);
     const task1 = tasks.create();
     const task2 = tasks.create();
     taskList.add(task1);

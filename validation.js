@@ -10,6 +10,7 @@ class Validate {
     }
 
     static uniqueID(input) {
+        if (input == null) throw new Error("Invalid Parameter: received undefined or null, uniqueID is required.")
         if (typeof input === "string") {
             Validate.username(input);
         } else if (typeof input !== "number") {

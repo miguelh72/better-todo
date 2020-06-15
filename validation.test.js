@@ -118,7 +118,7 @@ test("Validate task list input", () => {
 });
 
 test("Validate User input", () => {
-    let user = users.create();
+    let user = users.create("mike72");
 
     expect(validate.user(user)).toBe(true);
     expect(() => validate.user(new Object())).toThrow(/Invalid Parameter/);
@@ -144,8 +144,8 @@ test("Validate User input", () => {
 });
 
 test("Validate list table input", () => {
-    const user = users.create();
-    const taskLists = [tasks.createList()];
+    const user = users.create("mike72");
+    const taskLists = [tasks.createList(1)];
     const listTable = persistence.createListTable(user, taskLists);
 
     expect(validate.listTable(listTable)).toBe(true);
