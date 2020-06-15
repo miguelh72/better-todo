@@ -4,6 +4,7 @@ const validate = require("./validation.js");
 const mixins = require("./mixins.js");
 
 class UniqueIDObjSaver {
+    
     constructor() {
         this.__virtualDB__ = {}
     }
@@ -66,6 +67,7 @@ function removePromise(db, uid) {
 }
 
 class ListTable extends mixins.UniqueID(Object) {
+
     constructor(user, taskListArray) {
         validate.user(user);
         taskListArray.forEach(taskList => validate.taskList(taskList));
@@ -81,6 +83,7 @@ class ListTable extends mixins.UniqueID(Object) {
             }
             return listDict;
         }, {});
+        this.implementsListTable = true;
     }
 
     add(taskList) {

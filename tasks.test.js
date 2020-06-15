@@ -2,8 +2,6 @@ const tasks = require("./tasks.js");
 
 /** Tasks */
 
-// TODO create validation module and validation tests
-
 test("Create task with default values", () => {
   const task = tasks.create();
   expect(task).toBeTruthy();
@@ -74,6 +72,7 @@ test("Create list of tasks with default values", () => {
   expect(taskList.name).toBe("Unnamed");
   expect(taskList.completed).toBe(true); // no tasks is a completed list
   expect(taskList.archived).toBe(false);
+  expect(taskList.length).toBe(0);
 });
 
 test("Add and retrieve tasks from task list", () => {
@@ -86,6 +85,7 @@ test("Add and retrieve tasks from task list", () => {
   expect(taskList.toArray()).toEqual([task1, task2]);
   expect(taskList.completed).toBe(false);
   expect(taskList.archived).toBe(false);
+  expect(taskList.length).toBe(2);
 });
 
 test("Remove tasks from task list", () => {
@@ -97,8 +97,10 @@ test("Remove tasks from task list", () => {
   
   taskList.remove(task1);
   expect(taskList.toArray()).toEqual([task2]);
+  expect(taskList.length).toBe(1);
   taskList.remove(task2);
   expect(taskList.toArray()).toEqual([]);
+  expect(taskList.length).toBe(0);
   taskList.remove(task1);
   expect(taskList.toArray()).toEqual([]);
   expect(taskList.completed).toBe(true);

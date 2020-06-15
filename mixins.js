@@ -15,6 +15,7 @@ function Creatable(superclass) {
 
             super(...arguments);
             this.__dateCreated__ = dateCreated;
+            this.implementsCreatable = true;
         }
 
         get dateCreated() { return this.__dateCreated__; }
@@ -30,6 +31,7 @@ function Updatable(superclass) {
 
             super(...arguments);
             this.__dateUpdated__ = dateUpdated;
+            this.implementsUpdatable = true;
         }
 
         get dateUpdated() { return this.__dateUpdated__; }
@@ -54,6 +56,7 @@ function UniqueID(superclass) {
 
             super(...arguments);
             this.__uniqueID__ = uniqueID;
+            this.implementsUniqueID = true;
         }
 
         get uid() { return this.__uniqueID__; }
@@ -68,6 +71,7 @@ function Account(superclass) {
 
             super(...arguments);
             this.__username__ = username;
+            this.implementsAccount = true;
         }
 
         get username() { return this.__username__; }
@@ -82,6 +86,7 @@ function Nameable(superclass) {
 
             super(...arguments);
             this.__name__ = name;
+            this.implementsNameable = true;
         }
 
         get name() { return this.__name__; }
@@ -101,6 +106,7 @@ function Description(superclass) {
 
             super(...arguments);
             this.__description__ = description;
+            this.implementsDescription = true;
         }
 
         get description() { return this.__description__; }
@@ -122,6 +128,7 @@ function Importance(superclass) {
 
             super(...arguments);
             this.__isImportant__ = important;
+            this.implementsImportance = true;
         }
 
         get important() { return this.__isImportant__; }
@@ -141,6 +148,7 @@ function Urgency(superclass) {
             super(...arguments);
             this.__isUrgent__ = urgent;
             this.__dueDate__ = dueDate;
+            this.implementsUrgency = true;
         }
 
         get urgent() { return this.__isUrgent__; }
@@ -169,6 +177,7 @@ function Archivable(superclass) {
             super(...arguments);
             this.__isArchived__ = archived;
             this.__isCompleted__ = completed;
+            this.implementsArchivable = true;
         }
 
         get archived() { return this.__isArchived__; }

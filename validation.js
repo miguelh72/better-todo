@@ -37,45 +37,51 @@ class Validate {
         return true;
     }
 
-    // TODO consider using an isMixinName = true property and testing against it using a DRY function call with mixin to test against
-    static task(input) {
-        if (input == null) throw new Error("Invalid Parameter: received undefined or null instead of task.");
-        if (input.dateCreated == null) throw new Error("Invalid Parameter: Task must implement Creatable interface");
-        if (input.dateUpdated === undefined) throw new Error("Invalid Parameter: Task must implement Updatable interface.");
-        if (input.description == null) throw new Error("Invalid Parameter: Task must implement Description interface");
-        if (input.important == null) throw new Error("Invalid Parameter: Task must implement Importance interface.");
-        if (input.urgent == null) throw new Error("Invalid Parameter: Task must implement Urgency interface.");
-        if (input.archived == null) throw new Error("Invalid Parameter: Task must implement Archivable interface");
-        if (input.completed == null) throw new Error("Invalid Parameter: Task must implement Archivable interface");
+    static containsMixin(obj, objName, ...mixinNameArray) {
+        if (obj == null) throw new Error(`Invalid Parameter: received undefined or null instead of ${objName}.`);
+        mixinNameArray.forEach(mixinName => {
+            if (!obj[`implements${mixinName}`])
+                throw new Error(`Invalid Parameter: ${objName} must implement ${mixinName} interface.`);
+        })
         return true;
+    }
+
+    static task(input) {
+        return Validate.containsMixin(input, "Task",
+            "Creatable",
+            "Updatable",
+            "Description",
+            "Importance",
+            "Urgency",
+            "Archivable",
+        );
     }
 
     static taskList(input) {
-        if (input == null) throw new Error("Invalid Parameter: received undefined or null instead of task list.");
-        if (input.add == null) throw new Error("Invalid Parameter: Task list must implement ListContainer interface");
-        if (input.description == null) throw new Error("Invalid Parameter: Task list must implement Description interface");
-        if (input.name == null) throw new Error("Invalid Parameter: Task list must implement Nameable interface");
-        if (input.archived == null) throw new Error("Invalid Parameter: Task list must implement Archivable interface");
-        if (input.completed == null) throw new Error("Invalid Parameter: Task list must implement Archivable interface");
-        return true;
+        return Validate.containsMixin(input, "TaskList", 
+            "ListContainer",
+            "UniqueID",
+            "Description",
+            "Nameable",
+            "Archivable",
+        );
     }
 
     static user(input) {
-        if (input == null) throw new Error("Invalid Parameter: received undefined or null instead of User.");
-        if (input.dateCreated == null) throw new Error("Invalid Parameter: User must implement Creatable interface");
-        if (input.dateUpdated === undefined) throw new Error("Invalid Parameter: User must implement Updatable interface.");
-        if (input.uid == null) throw new Error("Invalid Parameter: User must implement UniqueID interface");
-        if (input.username === undefined) throw new Error("Invalid Parameter: User must implement Account interface");
-        if (input.name == null) throw new Error("Invalid Parameter: User must implement Nameable interface");
-        return true;
+        return Validate.containsMixin(input, "User",
+            "UniqueID",
+            "Account",
+            "Creatable",
+            "Updatable",
+            "Nameable",
+        );
     }
 
     static listTable(input) {
-        if (input == null) throw new Error("Invalid Parameter: received undefined or null instead of list table.");
-        if (input.uid == null) throw new Error("Invalid Parameter: List table must implement UniqueID interface");
-        if (input.add == null) throw new Error("Invalid Parameter: List Table must implement add/remove contract");
-        if (input.remove == null) throw new Error("Invalid Parameter: List Table must implement add/remove contract");
-        return true;
+        return Validate.containsMixin(input, "ListTable",
+            "UniqueID",
+            "ListTable",
+        );
     }
 }
 

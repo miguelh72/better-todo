@@ -8,6 +8,7 @@ class ListContainer {
     constructor({ itemValidator = () => true } = {}) {
         this.__list__ = [];
         this.__isValid__ = itemValidator;
+        this.implementsListContainer = true;
     }
 
     toArray() {
@@ -32,7 +33,6 @@ class ListContainer {
         return false;
     }
 
-    // TODO add tests for this, I know this isn't following TDD, sorry
     get length() { return this.__list__.length; }
     set length(_) { throw new Error("Assignment Error: length is not updatable.") }
 }
