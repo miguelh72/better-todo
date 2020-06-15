@@ -5,21 +5,49 @@ const users = require("./users.js");
 const tasks = require("./tasks.js");
 const validate = require("./validation.js");
 
+/** Unique IDs */
+
+async function testUniqueIDFactory(asyncGetFunc) {
+    const numIDs = 100;
+    
+    const uniqueIDArray = [];
+    for (let i = 0; i < numIDs; i++) {
+        uniqueIDArray.push(await asyncGetFunc());
+    }
+
+    while(uniqueIDArray.length !== 0) {
+        const uniqueID = uniqueIDArray.pop();
+        expect(validate.uniqueID(uniqueID)).toBe(true);
+        expect(uniqueIDArray.includes(uniqueID)).toBe(false);
+    }
+}
+
+test("Get next available unique user ID", async () => {
+    await testUniqueIDFactory(persistence.asyncGetUniqueUserID);
+});
+
+test("Get next available unique task list ID", async () => {
+    await testUniqueIDFactory(persistence.asyncGetUniqueTaskListID);
+    // TODO implement above factory
+});
+
+// TODO test one uniqueID factory does not interfere with another
+
 /** Users */
 
 test("Save and retrieve new user.", async () => {
     const user = users.create();
     const userID = user.uid;
 
-    await expect(persistence.saveUser(user)).resolves.toBe(true);
-    await expect(persistence.getUser(userID)).resolves.toEqual(user);
+    await expect(persistence.asyncSaveUser(user)).resolves.toBe(true);
+    await expect(persistence.asyncGetUser(userID)).resolves.toEqual(user);
 });
 
 test("Attempt to retrieve user that doesnt exist", async () => {
     const fakeID = 99999999;
 
-    await expect(persistence.getUser(fakeID)).rejects.toThrow(/Missing Resource/);
-    await expect(persistence.getUser()).rejects.toThrow(/Invalid Parameter/);
+    await expect(persistence.asyncGetUser(fakeID)).rejects.toThrow(/Missing Resource/);
+    await expect(persistence.asyncGetUser()).rejects.toThrow(/Invalid Parameter/);
 });
 
 test("Save and retrieve multiple users", async() => {
@@ -28,11 +56,11 @@ test("Save and retrieve multiple users", async() => {
     const userList = [...Array(numUsers).keys()].map(uid => users.create(uid));
     
     for (let user of userList) {
-        await expect(persistence.saveUser(user)).resolves.toBe(true);
+        await expect(persistence.asyncSaveUser(user)).resolves.toBe(true);
     }
 
     for (let user of userList) {
-        await expect(persistence.getUser(user.uid)).resolves.toEqual(user);
+        await expect(persistence.asyncGetUser(user.uid)).resolves.toEqual(user);
     }
 });
 
@@ -43,17 +71,17 @@ test("Save and remove users", async () => {
     const userList = [...Array(numUsers).keys()].map(uid => users.create(uid));
     
     for (let user of userList) {
-        await expect(persistence.saveUser(user)).resolves.toBe(true);
+        await expect(persistence.asyncSaveUser(user)).resolves.toBe(true);
     }
 
     const removedUsers = [];
     for (let index of indexUsersToRemove) {
         removedUsers.push(userList[index]);
-        await expect(persistence.removeUser(userList[index].uid)).resolves.toBe(true);
+        await expect(persistence.asyncRemoveUser(userList[index].uid)).resolves.toBe(true);
     }
 
     for (let user of removedUsers) {
-        await expect(persistence.getUser(user.uid)).rejects.toThrow(/Missing Resource/);
+        await expect(persistence.asyncGetUser(user.uid)).rejects.toThrow(/Missing Resource/);
     }
 });
 
@@ -63,15 +91,15 @@ test("Save and retrieve new task list", async () => {
     const taskList = tasks.createList();
     const taskListUID = taskList.uid;
 
-    await expect(persistence.saveTaskList(taskList)).resolves.toBe(true);
-    await expect(persistence.getTaskList(taskListUID)).resolves.toEqual(taskList);
+    await expect(persistence.asyncSaveTaskList(taskList)).resolves.toBe(true);
+    await expect(persistence.asyncGetTaskList(taskListUID)).resolves.toEqual(taskList);
 });
 
 test("Attempt to retrieve task list that doesnt exist", async () => {
     const fakeID = 99999999;
 
-    await expect(persistence.getTaskList(fakeID)).rejects.toThrow(/Missing Resource/);
-    await expect(persistence.getTaskList()).rejects.toThrow(/Invalid Parameter/);
+    await expect(persistence.asyncGetTaskList(fakeID)).rejects.toThrow(/Missing Resource/);
+    await expect(persistence.asyncGetTaskList()).rejects.toThrow(/Invalid Parameter/);
 });
 
 test("Save and retrieve multiple task lists", async () => {
@@ -80,11 +108,11 @@ test("Save and retrieve multiple task lists", async () => {
     const taskListArray = [...Array(numTaskLists).keys()].map(uid => tasks.createList(uid));
     
     for (let taskList of taskListArray) {
-        await expect(persistence.saveTaskList(taskList)).resolves.toBe(true);
+        await expect(persistence.asyncSaveTaskList(taskList)).resolves.toBe(true);
     }
 
     for (let taskList of taskListArray) {
-        await expect(persistence.getTaskList(taskList.uid)).resolves.toEqual(taskList);
+        await expect(persistence.asyncGetTaskList(taskList.uid)).resolves.toEqual(taskList);
     }
 });
 
@@ -95,17 +123,17 @@ test("Save and remove task lists", async () => {
     const taskListArray = [...Array(numTaskLists).keys()].map(uid => tasks.createList(uid));
     
     for (let taskList of taskListArray) {
-        await expect(persistence.saveTaskList(taskList)).resolves.toBe(true);
+        await expect(persistence.asyncSaveTaskList(taskList)).resolves.toBe(true);
     }
 
     const removedTaskLists = [];
     for (let index of indexTaskListToRemove) {
         removedTaskLists.push(taskListArray[index]);
-        await expect(persistence.removeTaskList(taskListArray[index].uid)).resolves.toBe(true);
+        await expect(persistence.asyncRemoveTaskList(taskListArray[index].uid)).resolves.toBe(true);
     }
 
     for (let taskList of removedTaskLists) {
-        await expect(persistence.getTaskList(taskList.uid)).rejects.toThrow(/Missing Resource/);
+        await expect(persistence.asyncGetTaskList(taskList.uid)).rejects.toThrow(/Missing Resource/);
     }
 });
 
@@ -151,7 +179,7 @@ test("Save user's list table", async () => {
     const taskListArray = [...Array(numTaskLists).keys()].map(_ => tasks.createList());
     const listTable = persistence.createListTable(user, taskListArray);
 
-    await expect(persistence.saveListTable(listTable)).resolves.toBe(true);
+    await expect(persistence.asyncSaveListTable(listTable)).resolves.toBe(true);
 });
 
 test("Save and retrieve user's list table", async () => {
@@ -161,9 +189,9 @@ test("Save and retrieve user's list table", async () => {
     const taskListArray = [...Array(numTaskLists).keys()].map(_ => tasks.createList());
     const listTable = persistence.createListTable(user, taskListArray);
 
-    await expect(persistence.saveListTable(listTable)).resolves.toBe(true);
+    await expect(persistence.asyncSaveListTable(listTable)).resolves.toBe(true);
     
-    const returnedListTable = await persistence.getListTable(user);
+    const returnedListTable = await persistence.asyncGetListTable(user);
     expect(validate.listTable(returnedListTable)).toBe(true);
     let listTableListIDs = returnedListTable.getListIDs();
     taskListArray.forEach(taskList => expect(listTableListIDs.includes(taskList.uid)).toBe(true));
@@ -181,20 +209,20 @@ test("Save and remove user's list table", async () => {
     });
     
     for (let listTable of listTableArray) {
-        await expect(persistence.saveListTable(listTable)).resolves.toBe(true);
+        await expect(persistence.asyncSaveListTable(listTable)).resolves.toBe(true);
     }
 
     for (let index of indexListTablesToRemove) {
-        await expect(persistence.removeListTable(userArray[index])).resolves.toBe(true);
+        await expect(persistence.asyncRemoveListTable(userArray[index])).resolves.toBe(true);
     }
 
     for (let index of indexListTablesToRemove) {
-        await expect(persistence.getListTable(userArray[index])).rejects.toThrow(/Missing Resource/);
+        await expect(persistence.asyncGetListTable(userArray[index])).rejects.toThrow(/Missing Resource/);
     }
 
     for (let [index, user] of userArray.entries()) {
         if (!indexListTablesToRemove.includes(index)) {
-            await expect(persistence.getListTable(user)).resolves.toEqual(listTableArray[index]);
+            await expect(persistence.asyncGetListTable(user)).resolves.toEqual(listTableArray[index]);
         }
     }
 });
@@ -204,9 +232,9 @@ test("Attempt to retrieve list table that doesnt exist", async () => {
 
     const fakeUser = users.create(fakeID);
 
-    await expect(persistence.getListTable(fakeUser)).rejects.toThrow(/Missing Resource/);
+    await expect(persistence.asyncGetListTable(fakeUser)).rejects.toThrow(/Missing Resource/);
     await expect(new Promise((resolve, reject) => {
-        try { resolve(persistence.getListTable()) }
+        try { resolve(persistence.asyncGetListTable()) }
         catch (error) { reject(error) }
     })).rejects.toThrow(/Invalid Parameter/);
 });

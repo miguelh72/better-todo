@@ -51,7 +51,7 @@ function nextAvailableID() {
 }
 function UniqueID(superclass) {
     return class extends superclass {
-        constructor({ uniqueID = nextAvailableID() }) {
+        constructor({ uniqueID = nextAvailableID() } = {}) {
             validate.uniqueID(uniqueID);
 
             super(...arguments);

@@ -7,6 +7,7 @@ class UniqueIDObjSaver {
     
     constructor() {
         this.__virtualDB__ = {}
+        this.__nextUniqueID__ = 1;
     }
 
     save(uniqueIDObj) {
@@ -23,47 +24,33 @@ class UniqueIDObjSaver {
         delete this.__virtualDB__[uniqueID];
         return true;
     }
+
+    nextUniqueID() {
+        return this.__nextUniqueID__++;
+    }
 }
 const virtualUserDB = new UniqueIDObjSaver();
 const virtualTaskListDB = new UniqueIDObjSaver();
 const virtualListTableDB = new UniqueIDObjSaver();
 
-function savePromise(db, validateFunc, saveable) {
-    return new Promise((resolve, reject) => {
-        try {
-            validateFunc(saveable);
+async function savePromise(db, validateFunc, saveable) {
+    validateFunc(saveable);
 
-            resolve(db.save(saveable));
-        } catch (error) {
-            reject(error);
-        }
-    });
+    return db.save(saveable);
 }
 
-function retrievePromise(db, uid) {
-    return new Promise((resolve, reject) => {
-        try {
-            validate.uniqueID(uid);
+async function retrievePromise(db, uid) {
+    validate.uniqueID(uid);
 
-            const saveable = db.retrieve(uid);
-            if (saveable == null) reject(new Error("Missing Resource: Resource does not exist"));
-            resolve(saveable);
-        } catch (error) {
-            reject(error);
-        }
-    });
+    const saveable = db.retrieve(uid);
+    if (saveable == null) throw new Error("Missing Resource: Resource does not exist");
+    return saveable;      
 }
 
-function removePromise(db, uid) {
-    return new Promise((resolve, reject) => {
-        try {
-            validate.uniqueID(uid);
+async function removePromise(db, uid) {
+    validate.uniqueID(uid);
 
-            resolve(db.remove(uid));
-        } catch (error) {
-            reject(error);
-        }
-    });
+    return db.remove(uid);
 }
 
 class ListTable extends mixins.UniqueID(Object) {
@@ -109,25 +96,42 @@ class ListTable extends mixins.UniqueID(Object) {
     set length(_) { throw new Error("Assignment Error: length is not updatable.") }
 }
 
-module.exports = {
-    saveUser: user => savePromise(virtualUserDB, validate.user, user),
-    getUser: uid => retrievePromise(virtualUserDB, uid),
-    removeUser: uid => removePromise(virtualUserDB, uid),
+async function asyncGetUniqueUserID() { return virtualUserDB.nextUniqueID(); }
 
-    saveTaskList: taskList => savePromise(virtualTaskListDB, validate.taskList, taskList),
-    getTaskList: uid => retrievePromise(virtualTaskListDB, uid),
-    removeTaskList: uid => removePromise(virtualTaskListDB, uid),
+async function asyncSaveUser(user) { return savePromise(virtualUserDB, validate.user, user); }
+async function asyncGetUser(uid) { return retrievePromise(virtualUserDB, uid) }
+async function asyncRemoveUser(uid) { return removePromise(virtualUserDB, uid) }
 
-    createListTable: (user, taskListArray) => new ListTable(user, taskListArray),
-    saveListTable: listTable => savePromise(virtualListTableDB, () => true, listTable),
-    getListTable: user => {
+async function asyncSaveTaskList(taskList) { return savePromise(virtualTaskListDB, validate.taskList, taskList) }
+async function asyncGetTaskList(uid) { return retrievePromise(virtualTaskListDB, uid) }
+async function asyncRemoveTaskList(uid) { return removePromise(virtualTaskListDB, uid) }
+
+function createListTable(user, taskListArray) { return new ListTable(user, taskListArray) }
+async function asyncSaveListTable(listTable) { return savePromise(virtualListTableDB, () => true, listTable) }
+async function asyncGetListTable(user) {
         validate.user(user);
 
         return retrievePromise(virtualListTableDB, user.uid);
-    },
-    removeListTable: user => {
+}
+async function asyncRemoveListTable(user) {
         validate.user(user);
 
         return removePromise(virtualListTableDB, user.uid);
-    }
+}
+
+module.exports = {
+    asyncGetUniqueUserID,
+
+    asyncSaveUser,
+    asyncGetUser,
+    asyncRemoveUser,
+
+    asyncSaveTaskList,
+    asyncGetTaskList,
+    asyncRemoveTaskList,
+
+    createListTable,
+    asyncSaveListTable,
+    asyncGetListTable,
+    asyncRemoveListTable,
 };
