@@ -31,6 +31,10 @@ class ListContainer {
         }
         return false;
     }
+
+    // TODO add tests for this, I know this isn't following TDD, sorry
+    get length() { return this.__list__.length; }
+    set length(_) { throw new Error("Assignment Error: length is not updatable.") }
 }
 
 class Task extends mixins.mix(
@@ -52,7 +56,7 @@ class TaskContainer extends ListContainer {
 
 class TaskList extends mixins.mix(
     TaskContainer,
-    mixins.uniqueID,
+    mixins.UniqueID,
     mixins.Description,
     mixins.Nameable,
     mixins.Archivable,

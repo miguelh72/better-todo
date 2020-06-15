@@ -47,7 +47,7 @@ function nextAvailableID() {
     lastID++;
     return lastID;
 }
-function uniqueID(superclass) {
+function UniqueID(superclass) {
     return class extends superclass {
         constructor({ uniqueID = nextAvailableID() }) {
             validate.uniqueID(uniqueID);
@@ -189,7 +189,7 @@ function Archivable(superclass) {
 
 module.exports = {
     mix,
-    uniqueID,
+    UniqueID,
     Account,
     Creatable,
     Updatable,

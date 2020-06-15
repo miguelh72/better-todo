@@ -5,7 +5,7 @@ const mixins = require("./mixins.js");
 
 class User extends mixins.mix(
     Object,
-    mixins.uniqueID,
+    mixins.UniqueID,
     mixins.Account,
     mixins.Creatable,
     mixins.Updatable,

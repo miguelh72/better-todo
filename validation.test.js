@@ -1,6 +1,7 @@
 const validate = require("./validation.js");
 const tasks = require("./tasks.js");
 const users = require("./users.js");
+const persistence = require("./persistence.js");
 
 test("Validate date inputs", () => {
     expect(validate.date(new Date())).toBe(true);
@@ -91,4 +92,14 @@ test("Validate User input", () => {
     expect(validate.user(user)).toBe(true);
     expect(() => validate.user(new Object())).toThrow();
     expect(() => validate.user()).toThrow();
+});
+
+test("Validate list table input", () => {
+    const user = users.create();
+    const taskLists = [tasks.createList()];
+    const listTable = persistence.createListTable(user, taskLists);
+
+    expect(validate.listTable(listTable)).toBe(true);
+    expect(() => validate.listTable(new Object())).toThrow();
+    expect(() => validate.listTable()).toThrow();
 });
