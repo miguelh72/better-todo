@@ -25,15 +25,26 @@ const testUserInfo = {
 
 /** Create User */
 
+async function testUserCreation(user) {
+    expect(validate.user(user)).toBe(true);
+    
+    const userListTable = await persistence.asyncReadListTable(user.uid);
+    expect(validate.listTable(userListTable)).toBe(true);
+
+    const defaultTaskListID = userListTable.getListIDs()[0];
+    expect(validate.uniqueID(defaultTaskListID)).toBe(true);
+    const defaultTaskList = await persistence.asyncReadTaskList(defaultTaskListID);
+    expect(validate.taskList(defaultTaskList)).toBe(true);
+    expect(defaultTaskList.name).toBe("default");
+}
+
 test("Create a new user.", async () => {
     const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
 
-    expect(validate.user(user)).toBe(true);
+    await testUserCreation(user);
     expect(user.uid).toBe(testUserInfo.username);
     expect(user.name).toBe(testUserInfo.name);
     expect(user.dateCreated).toBe(testUserInfo.dateCreated);
-
-    expect(validate.listTable(await persistence.asyncReadListTable(user.uid))).toBe(true);
 
     await cleanupUserPersistence();
 });
@@ -61,8 +72,13 @@ test("Create user with existing username", async () => {
 test("Create many users simultaneously", async () => {
     const numUsers = 100;
 
-    const userArray = await Promise.all([...Array(numUsers).keys()].map(i => controller.asyncNewUser("username" + i)));
-    userArray.forEach(user => expect(validate.user(user)).toBe(true));
+    const userArray = await Promise.all(
+        [...Array(numUsers).keys()].map(i => controller.asyncNewUser("username" + i))
+    );
+
+    for (let user of userArray) {
+        await testUserCreation(user);
+    }
 
     await cleanupUserPersistence();
 });
@@ -115,8 +131,12 @@ test("Try to update User that does not exist", async () => {
 
 test("Delete User from storage", async () => {
     const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
+    const userListTable = await persistence.asyncReadListTable(user.uid);
+    const defaultTaskList = await persistence.asyncReadTaskList(userListTable.getListIDs()[0]);
 
     await expect(controller.asyncDeleteUser(user)).resolves.toBe(true);
+    await expect(persistence.asyncReadListTable(user.uid)).rejects.toThrow(/Missing Resource/);
+    await expect(persistence.asyncReadTaskList(defaultTaskList.uid)).rejects.toThrow(/Missing Resource/);
 
     await cleanupUserPersistence();
 });

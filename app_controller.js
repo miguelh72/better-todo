@@ -2,6 +2,7 @@
 
 const users = require("./users.js");
 const persistence = require("./persistence.js");
+const tasks = require("./tasks.js");
 
 /**
  * Asynchronously create new User object in storage.
@@ -11,8 +12,29 @@ const persistence = require("./persistence.js");
  * @returns {Promise<User>} User object
  */
 async function asyncNewUser(username, name, dateCreated) {
-    const newUser = users.create(username, name, dateCreated);
-    await persistence.asyncCreateUser(newUser);
+    let newUser, defaultTaskList, userListTable;
+    try {
+        newUser = users.create(username, name, dateCreated);
+
+        const defaultTaskListID = await persistence.asyncGetUniqueTaskListID();
+        defaultTaskList = tasks.createList(defaultTaskListID, "default", "Default task list");
+        await persistence.asyncSaveTaskList(defaultTaskList);
+
+        userListTable = persistence.createListTable(newUser, [defaultTaskList]);
+        await persistence.asyncSaveListTable(userListTable);
+
+        await persistence.asyncCreateUser(newUser);
+    } catch (error) {
+        // Cleanup potentially saved resources
+        if (defaultTaskList) {
+            await persistence.asyncDeleteTaskList(defaultTaskList.uid);
+        }
+        if (userListTable) {
+            await persistence.asyncDeleteListTable(newUser.uid);
+        }
+        throw error;
+    }
+
     return newUser;
 }
 
@@ -23,10 +45,10 @@ async function asyncNewUser(username, name, dateCreated) {
  */
 async function asyncRetrieveUser(username) {
     try {
-        const user =  await persistence.asyncReadUser(username);
+        const user = await persistence.asyncReadUser(username);
         return user;
     } catch (error) {
-        if (/Missing Resource/.test(error.message)) { return false; } 
+        if (/Missing Resource/.test(error.message)) { return false; }
         else { throw error }
     }
 }
@@ -48,10 +70,19 @@ async function asyncUpdateUser(user) {
  * @returns {boolean} True if successful, false if missing resource in storage.
  */
 async function asyncDeleteUser(user) {
+    try {
+        const userListTable = await persistence.asyncReadListTable(user.uid);
+        for (let taskListID of userListTable.getListIDs()) {
+            await persistence.asyncDeleteTaskList(taskListID);
+        }
+        await persistence.asyncDeleteListTable(user.uid);
+    } catch (error) {
+        if (!/Missing Resource/.test(error.message)) throw error;
+    }
     return await persistence.asyncDeleteUser(user.uid);
 }
 
-module.exports = { 
+module.exports = {
     asyncNewUser,
     asyncRetrieveUser,
     asyncUpdateUser,
