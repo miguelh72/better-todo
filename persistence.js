@@ -111,45 +111,50 @@ class ListTable extends mixins.UniqueID(Object) {
 
 async function asyncGetUniqueTaskListID() { return virtualTaskListDB.nextUniqueID(); }
 
-async function asyncSaveUser(user) { 
+async function asyncCreateUser(user) { 
     if (virtualUserDB.contains(user.uid)) throw new Error("Existing Username: Another user already has that username.");
     return savePromise(virtualUserDB, validate.user, user); 
 }
-async function asyncGetUser(uid) { return retrievePromise(virtualUserDB, uid) }
-async function asyncGetAllUsers() { return retrieveAllPromise(virtualUserDB) }
-async function asyncRemoveUser(uid) { return removePromise(virtualUserDB, uid) }
+async function asyncReadUser(userUID) { return retrievePromise(virtualUserDB, userUID) }
+async function asyncUpdateUser(user) {
+    if (!virtualUserDB.contains(user.uid)) throw new Error("Missing Resource: No matching user in storage.");
+    return savePromise(virtualUserDB, validate.user, user); 
+}
+async function asyncReadAllUsers() { return retrieveAllPromise(virtualUserDB) }
+async function asyncDeleteUser(userUID) { return removePromise(virtualUserDB, userUID) }
 
 async function asyncSaveTaskList(taskList) { return savePromise(virtualTaskListDB, validate.taskList, taskList) }
-async function asyncGetTaskList(uid) { return retrievePromise(virtualTaskListDB, uid) }
-async function asyncRemoveTaskList(uid) { return removePromise(virtualTaskListDB, uid) }
+async function asyncReadTaskList(taskListUID) { return retrievePromise(virtualTaskListDB, taskListUID) }
+async function asyncDeleteTaskList(taskListUID) { return removePromise(virtualTaskListDB, taskListUID) }
 
 function createListTable(user, taskListArray) { return new ListTable(user, taskListArray) }
 async function asyncSaveListTable(listTable) { return savePromise(virtualListTableDB, () => true, listTable) }
-async function asyncGetListTable(user) {
-        validate.user(user);
+async function asyncReadListTable(userUID) {
+        validate.uniqueID(userUID);
 
-        return retrievePromise(virtualListTableDB, user.uid);
+        return retrievePromise(virtualListTableDB, userUID);
 }
-async function asyncRemoveListTable(user) {
-        validate.user(user);
+async function asyncDeleteListTable(userUID) {
+        validate.uniqueID(userUID);
 
-        return removePromise(virtualListTableDB, user.uid);
+        return removePromise(virtualListTableDB, userUID);
 }
 
 module.exports = {
     asyncGetUniqueTaskListID,
 
-    asyncSaveUser,
-    asyncGetUser,
-    asyncGetAllUsers,
-    asyncRemoveUser,
+    asyncCreateUser,
+    asyncReadUser,
+    asyncUpdateUser, // TODO add unit tests
+    asyncReadAllUsers,
+    asyncDeleteUser,
 
-    asyncSaveTaskList,
-    asyncGetTaskList,
-    asyncRemoveTaskList,
+    asyncSaveTaskList, // create or update
+    asyncReadTaskList,
+    asyncDeleteTaskList,
 
     createListTable,
-    asyncSaveListTable,
-    asyncGetListTable,
-    asyncRemoveListTable,
+    asyncSaveListTable, // create or update
+    asyncReadListTable,
+    asyncDeleteListTable,
 };
