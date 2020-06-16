@@ -2,45 +2,7 @@
 
 const validate = require("./validation.js");
 const mixins = require("./mixins.js");
-
-// TODO make this mock DB return copies instead of reference to original in DB
-class UniqueIDObjSaver {
-    
-    constructor() {
-        this.__virtualDB__ = {}
-        this.__nextUniqueID__ = 1;
-    }
-
-    save(uniqueIDObj) {
-        this.__virtualDB__[uniqueIDObj.uid] = uniqueIDObj;
-        return true;
-    }
-
-    retrieve(uniqueID) {
-        return this.__virtualDB__[uniqueID];
-    }
-
-    retrieveAll() {
-        return Object.values(this.__virtualDB__);
-    }
-
-    remove(uniqueID) {
-        if (this.__virtualDB__[uniqueID] == null) return false;
-        delete this.__virtualDB__[uniqueID];
-        return true;
-    }
-
-    contains(uniqueID) {
-        return this.__virtualDB__[uniqueID] != null;
-    }
-
-    nextUniqueID() {
-        return this.__nextUniqueID__++;
-    }
-}
-const virtualUserDB = new UniqueIDObjSaver();
-const virtualTaskListDB = new UniqueIDObjSaver();
-const virtualListTableDB = new UniqueIDObjSaver();
+const db = require("./virtualDBBoundary.js");
 
 async function savePromise(db, validateFunc, saveable) {
     validateFunc(saveable);
@@ -109,35 +71,62 @@ class ListTable extends mixins.UniqueID(Object) {
     set length(_) { throw new Error("Assignment Error: length is not updatable.") }
 }
 
-async function asyncGetUniqueTaskListID() { return virtualTaskListDB.nextUniqueID(); }
+async function asyncGetUniqueTaskListID() { 
+    return db.taskList.nextUniqueID(); 
+}
 
 async function asyncCreateUser(user) { 
-    if (virtualUserDB.contains(user.uid)) throw new Error("Existing Username: Another user already has that username.");
-    return savePromise(virtualUserDB, validate.user, user); 
+    if (db.user.contains(user.uid)) throw new Error("Existing Username: Another user already has that username.");
+    return savePromise(db.user, validate.user, user); 
 }
-async function asyncReadUser(userUID) { return retrievePromise(virtualUserDB, userUID) }
+
+async function asyncReadUser(userUID) { 
+    return retrievePromise(db.user, userUID) 
+}
+
 async function asyncUpdateUser(user) {
-    if (!virtualUserDB.contains(user.uid)) throw new Error("Missing Resource: No matching user in storage.");
-    return savePromise(virtualUserDB, validate.user, user); 
+    if (!db.user.contains(user.uid)) throw new Error("Missing Resource: No matching user in storage.");
+    return savePromise(db.user, validate.user, user); 
 }
-async function asyncReadAllUsers() { return retrieveAllPromise(virtualUserDB) }
-async function asyncDeleteUser(userUID) { return removePromise(virtualUserDB, userUID) }
 
-async function asyncSaveTaskList(taskList) { return savePromise(virtualTaskListDB, validate.taskList, taskList) }
-async function asyncReadTaskList(taskListUID) { return retrievePromise(virtualTaskListDB, taskListUID) }
-async function asyncDeleteTaskList(taskListUID) { return removePromise(virtualTaskListDB, taskListUID) }
+async function asyncReadAllUsers() { 
+    return retrieveAllPromise(db.user) 
+}
 
-function createListTable(user, taskListArray) { return new ListTable(user, taskListArray) }
-async function asyncSaveListTable(listTable) { return savePromise(virtualListTableDB, () => true, listTable) }
+async function asyncDeleteUser(userUID) { 
+    return removePromise(db.user, userUID) 
+}
+
+async function asyncSaveTaskList(taskList) { 
+    return savePromise(db.taskList, validate.taskList, taskList) 
+}
+
+async function asyncReadTaskList(taskListUID) { 
+    return retrievePromise(db.taskList, taskListUID) 
+}
+
+async function asyncDeleteTaskList(taskListUID) { 
+    return removePromise(db.taskList, taskListUID) 
+}
+
+function createListTable(user, taskListArray) { 
+    return new ListTable(user, taskListArray) 
+}
+
+async function asyncSaveListTable(listTable) { 
+    return savePromise(db.listTable, () => true, listTable) 
+}
+
 async function asyncReadListTable(userUID) {
         validate.uniqueID(userUID);
 
-        return retrievePromise(virtualListTableDB, userUID);
+        return retrievePromise(db.listTable, userUID);
 }
+
 async function asyncDeleteListTable(userUID) {
         validate.uniqueID(userUID);
 
-        return removePromise(virtualListTableDB, userUID);
+        return removePromise(db.listTable, userUID);
 }
 
 module.exports = {

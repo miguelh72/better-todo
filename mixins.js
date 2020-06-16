@@ -45,7 +45,6 @@ function Updatable(superclass) {
     }
 }
 
-// TODO replace with persistent unique ID issuing system
 function UniqueID(superclass) {
     return class UniqueID extends superclass {
         constructor({ uniqueID } = {}) {
