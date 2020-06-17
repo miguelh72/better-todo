@@ -81,7 +81,7 @@ class TaskList extends mixins.mix(
     }
 }
 
-function create(description, dateCreated, dueDate, isImportant, isUrgent) {
+function create(description, dateCreated = new Date(), dueDate, isImportant, isUrgent) {
     return new Task({
         description,
         dateCreated,

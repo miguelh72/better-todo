@@ -4,30 +4,6 @@ const validate = require("./validation.js");
 const mixins = require("./mixins.js");
 const db = require("./virtualDBBoundary.js");
 
-async function savePromise(db, validateFunc, saveable) {
-    validateFunc(saveable);
-
-    return db.save(saveable);
-}
-
-async function retrievePromise(db, uid) {
-    validate.uniqueID(uid);
-
-    const saveable = db.retrieve(uid);
-    if (saveable == null) throw new Error("Missing Resource: Resource does not exist");
-    return saveable;      
-}
-
-async function retrieveAllPromise(db) {
-    return db.retrieveAll();
-}
-
-async function removePromise(db, uid) {
-    validate.uniqueID(uid);
-
-    return db.remove(uid);
-}
-
 class ListTable extends mixins.UniqueID(Object) {
 
     constructor(user, taskListArray) {
@@ -37,12 +13,7 @@ class ListTable extends mixins.UniqueID(Object) {
         super({ uniqueID: user.uid });
         this.userID = user.uid;
         this.__taskLists__ = taskListArray.reduce((listDict, taskList) => {
-            listDict[taskList.uid] = {
-                // TODO add tests for these once controller requires them
-                //achived: taskList.archived,
-                //completed: taskList.completed,
-                //length: taskList.length,
-            }
+            listDict[taskList.uid] = ListTable.__reduceTaskList__(taskList);
             return listDict;
         }, {});
         this.implementsListTable = true;
@@ -51,7 +22,7 @@ class ListTable extends mixins.UniqueID(Object) {
     add(taskList) {
         validate.taskList(taskList);
 
-        this.__taskLists__[taskList.uid] = taskList;
+        this.__taskLists__[taskList.uid] = ListTable.__reduceTaskList__(taskList);
         return true;
     }
 
@@ -69,81 +40,137 @@ class ListTable extends mixins.UniqueID(Object) {
 
     get length() { return Object.keys(this.__taskLists__).length; }
     set length(_) { throw new Error("Assignment Error: length is not updatable.") }
+
+    static __reduceTaskList__(taskList) {
+        return {
+            // TODO add tests for these once controller requires them
+            //achived: taskList.archived,
+            //completed: taskList.completed,
+            //length: taskList.length,
+        }
+    }
 }
 
-async function asyncGetUniqueTaskListID() { 
-    return db.taskList.nextUniqueID(); 
+async function createPromise(db, validateFunc, saveable) {
+    validateFunc(saveable);
+
+    const successful = await db.create(saveable);
+    if (!successful) throw new Error("Existing Resource: Resource already in storage.");
+    return true;
 }
 
-async function asyncCreateUser(user) { 
-    if (db.user.contains(user.uid)) throw new Error("Existing Username: Another user already has that username.");
-    return savePromise(db.user, validate.user, user); 
+async function readPromise(db, uid) {
+    validate.uniqueID(uid);
+
+    const saveable = await db.read(uid);
+    if (saveable == null) throw new Error("Missing Resource: Resource does not exist in storage.");
+    return saveable;
 }
 
-async function asyncReadUser(userUID) { 
-    return retrievePromise(db.user, userUID) 
+async function readAllPromise(db) {
+    return await db.readAll();
+}
+
+async function updatePromise(db, validateFunc, saveable) {
+    validateFunc(saveable);
+
+    const successful = await db.update(saveable);
+    if (!successful) throw new Error("Missing Resource: Resource does not exist in storage.");
+    return true;
+}
+
+async function deletePromise(db, uid) {
+    validate.uniqueID(uid);
+
+    return await db.delete(uid);
+}
+
+async function asyncCreateUser(user) {
+    return await createPromise(db.user, validate.user, user);
+}
+
+async function asyncReadUser(userUID) {
+    return await readPromise(db.user, userUID);
+}
+
+async function asyncReadAllUsers() {
+    return await readAllPromise(db.user)
 }
 
 async function asyncUpdateUser(user) {
-    if (!db.user.contains(user.uid)) throw new Error("Missing Resource: No matching user in storage.");
-    return savePromise(db.user, validate.user, user); 
+    return await updatePromise(db.user, validate.user, user);
 }
 
-async function asyncReadAllUsers() { 
-    return retrieveAllPromise(db.user) 
+async function asyncDeleteUser(userUID) {
+    return await deletePromise(db.user, userUID)
 }
 
-async function asyncDeleteUser(userUID) { 
-    return removePromise(db.user, userUID) 
+async function asyncNextUniqueTaskListID() {
+    return await db.taskList.nextUniqueID();
 }
 
-async function asyncSaveTaskList(taskList) { 
-    return savePromise(db.taskList, validate.taskList, taskList) 
+async function asyncCreateTaskList(taskList) {
+    return await createPromise(db.taskList, validate.taskList, taskList);
 }
 
-async function asyncReadTaskList(taskListUID) { 
-    return retrievePromise(db.taskList, taskListUID) 
+async function asyncReadTaskList(taskListUID) {
+    return await readPromise(db.taskList, taskListUID);
 }
 
-async function asyncDeleteTaskList(taskListUID) { 
-    return removePromise(db.taskList, taskListUID) 
+async function asyncReadAllTaskList() {
+    return await readAllPromise(db.taskList);
 }
 
-function createListTable(user, taskListArray) { 
-    return new ListTable(user, taskListArray) 
+async function asyncUpdateTaskList(taskList) {
+    return await updatePromise(db.taskList, validate.taskList, taskList);
 }
 
-async function asyncSaveListTable(listTable) { 
-    return savePromise(db.listTable, () => true, listTable) 
+async function asyncDeleteTaskList(taskListUID) {
+    return await deletePromise(db.taskList, taskListUID);
+}
+
+function createListTable(user, taskListArray) {
+    return new ListTable(user, taskListArray);
+}
+
+async function asyncCreateListTable(listTable) {
+    return await createPromise(db.listTable, () => true, listTable);
 }
 
 async function asyncReadListTable(userUID) {
-        validate.uniqueID(userUID);
+    return await readPromise(db.listTable, userUID);
+}
 
-        return retrievePromise(db.listTable, userUID);
+async function asyncReadAllListTable() {
+    return await readAllPromise(db.listTable);
+}
+
+async function asyncUpdateListTable(listTable) {
+    return await updatePromise(db.listTable, validate.listTable, listTable);
 }
 
 async function asyncDeleteListTable(userUID) {
-        validate.uniqueID(userUID);
-
-        return removePromise(db.listTable, userUID);
+    return await deletePromise(db.listTable, userUID);
 }
 
 module.exports = {
-    asyncGetUniqueTaskListID,
-
     asyncCreateUser,
     asyncReadUser,
-    asyncUpdateUser, // TODO add unit tests
     asyncReadAllUsers,
+    asyncUpdateUser, // TODO add unit tests
     asyncDeleteUser,
 
-    asyncSaveTaskList, // create or update
+    asyncNextUniqueTaskListID,
+    asyncCreateTaskList,
     asyncReadTaskList,
+    asyncReadAllTaskList, // TODO add unit tests
+    asyncUpdateTaskList,
     asyncDeleteTaskList,
 
     createListTable,
-    asyncSaveListTable, // create or update
+    asyncCreateListTable,
     asyncReadListTable,
+    asyncReadAllListTable, // TODO add unit tests
+    asyncUpdateListTable,
     asyncDeleteListTable,
 };

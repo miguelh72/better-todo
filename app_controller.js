@@ -1,8 +1,8 @@
 "use strict";
 
 const users = require("./users.js");
-const persistence = require("./persistence.js");
 const tasks = require("./tasks.js");
+const persistence = require("./persistence.js");
 
 /**
  * Asynchronously create new User object in storage.
@@ -16,12 +16,12 @@ async function asyncNewUser(username, name, dateCreated) {
     try {
         newUser = users.create(username, name, dateCreated);
 
-        const defaultTaskListID = await persistence.asyncGetUniqueTaskListID();
-        defaultTaskList = tasks.createList(defaultTaskListID, "default", "Default task list");
-        await persistence.asyncSaveTaskList(defaultTaskList);
+        const defaultTaskListID = await persistence.asyncNextUniqueTaskListID();
+        defaultTaskList = tasks.createList(defaultTaskListID, "default", "Default task list.");
+        await persistence.asyncCreateTaskList(defaultTaskList);
 
         userListTable = persistence.createListTable(newUser, [defaultTaskList]);
-        await persistence.asyncSaveListTable(userListTable);
+        await persistence.asyncCreateListTable(userListTable);
 
         await persistence.asyncCreateUser(newUser);
     } catch (error) {

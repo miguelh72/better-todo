@@ -7,20 +7,25 @@ const validate = require("./validation.js");
 const persistence = require("./persistence.js");
 const users = require("./users.js");
 
-async function cleanupUserPersistence() {
-    for (let user of (await persistence.asyncReadAllUsers()))
-        await persistence.asyncDeleteUser(user.uid);
+async function cleanupPersistence() {
     await Promise.all(
         (await persistence.asyncReadAllUsers())
             .map(user => persistence.asyncDeleteUser(user.uid))
     );
+    await Promise.all(
+        (await persistence.asyncReadAllTaskList())
+            .map(taskList => persistence.asyncDeleteTaskList(taskList.uid))
+    );
+    await Promise.all(
+        (await persistence.asyncReadAllListTable())
+            .map(listTable => persistence.asyncDeleteListTable(listTable.uid))
+    );
 }
-cleanupUserPersistence();
 
 const testUserInfo = {
     name: "Mike",
     username: "mike72",
-    dateCreated: new Date()
+    dateCreated: new Date("02/19/2005"),
 };
 
 /** Create User */
@@ -46,7 +51,7 @@ test("Create a new user.", async () => {
     expect(user.name).toBe(testUserInfo.name);
     expect(user.dateCreated).toBe(testUserInfo.dateCreated);
 
-    await cleanupUserPersistence();
+    await cleanupPersistence();
 });
 
 test("Try to create a bad user.", async () => {
@@ -57,30 +62,30 @@ test("Try to create a bad user.", async () => {
     await expect(controller.asyncNewUser(testUserInfo.username, testUserInfo.name, new Object()))
         .rejects.toThrow(/Invalid Parameter/);
 
-    await cleanupUserPersistence();
+    await cleanupPersistence();
 })
 
 test("Create user with existing username", async () => {
     const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
 
     await expect(controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated))
-        .rejects.toThrow(/Existing Username/);
+        .rejects.toThrow(/Existing Resource/);
 
-    await cleanupUserPersistence();
+    await cleanupPersistence();
 });
 
 test("Create many users simultaneously", async () => {
     const numUsers = 100;
 
     const userArray = await Promise.all(
-        [...Array(numUsers).keys()].map(i => controller.asyncNewUser("username" + i))
+        [...Array(numUsers).keys()].map(num => controller.asyncNewUser("username" + num))
     );
 
     for (let user of userArray) {
         await testUserCreation(user);
     }
 
-    await cleanupUserPersistence();
+    await cleanupPersistence();
 });
 
 /** Read User */
@@ -94,13 +99,13 @@ test("Retrieve existing user", async () => {
     expect(retrievedUser.name).toBe(testUserInfo.name);
     expect(retrievedUser.dateCreated).toBe(testUserInfo.dateCreated);
 
-    await cleanupUserPersistence();
+    await cleanupPersistence();
 })
 
 test("Try to retrieve user not in persistence.", async () => {
     await expect(controller.asyncRetrieveUser(testUserInfo.username)).resolves.toBe(false);
 
-    await cleanupUserPersistence();
+    await cleanupPersistence();
 });
 
 /** Update User */
@@ -116,7 +121,7 @@ test("Update User name", async () => {
     const retrievedUser = await controller.asyncRetrieveUser(user.username);
     expect(retrievedUser).toEqual(user);
 
-    await cleanupUserPersistence();
+    await cleanupPersistence();
 })
 
 test("Try to update User that does not exist", async () => {
@@ -124,7 +129,7 @@ test("Try to update User that does not exist", async () => {
 
     await expect(controller.asyncUpdateUser(user)).rejects.toThrow(/Missing Resource/);
 
-    await cleanupUserPersistence();
+    await cleanupPersistence();
 });
 
 /** Delete User */
@@ -138,7 +143,7 @@ test("Delete User from storage", async () => {
     await expect(persistence.asyncReadListTable(user.uid)).rejects.toThrow(/Missing Resource/);
     await expect(persistence.asyncReadTaskList(defaultTaskList.uid)).rejects.toThrow(/Missing Resource/);
 
-    await cleanupUserPersistence();
+    await cleanupPersistence();
 });
 
 test("Try to delete user that does not exist in storage.", async () => {

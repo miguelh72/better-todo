@@ -1,81 +1,143 @@
 "use strict";
 
 const users = require("./users.js");
+const tasks = require("./tasks.js");
+const mixins = require("./mixins.js");
+const validate = require("./validation.js");
 
-// TODO refactor out of persistence module and standardize interface
+// WARNING: Below is copy paste from persistence module. Only reason I'm doing this is because this is a temporary
+// emulation of a db boundary and will be refactored once a db is chosen.
+class ListTable extends mixins.UniqueID(Object) {
 
-class VirtualUserDB {
-    
-    constructor() {
-        this.__virtualDB__ = {}
+    constructor(user, taskListArray) {
+        validate.user(user);
+        taskListArray.forEach(taskList => validate.taskList(taskList));
+
+        super({ uniqueID: user.uid });
+        this.userID = user.uid;
+        this.__taskLists__ = taskListArray.reduce((listDict, taskList) => {
+            listDict[taskList.uid] = ListTable.__reduceTaskList__(taskList);
+            return listDict;
+        }, {});
+        this.implementsListTable = true;
     }
 
-    save(user) {
-        this.__virtualDB__[user.uid] = user;
+    add(taskList) {
+        validate.taskList(taskList);
+
+        this.__taskLists__[taskList.uid] = ListTable.__reduceTaskList__(taskList);
         return true;
     }
 
-    retrieve(uniqueID) {
-        const user = this.__virtualDB__[uniqueID];
-        return (user != null) ? users.create(user.username, user.name, user.dateCreated) : user;
+    remove(taskList) {
+        validate.taskList(taskList);
+
+        if (this.__taskLists__[taskList.uid] == null) return false;
+        delete this.__taskLists__[taskList.uid];
+        return true;
     }
 
-    retrieveAll() {
+    getListIDs() {
+        return Object.keys(this.__taskLists__).map(id => parseInt(id));
+    }
+
+    get length() { return Object.keys(this.__taskLists__).length; }
+    set length(_) { throw new Error("Assignment Error: length is not updatable.") }
+
+    static __reduceTaskList__(taskList) {
+        return {
+            // TODO add tests for these once controller requires them
+            //achived: taskList.archived,
+            //completed: taskList.completed,
+            //length: taskList.length,
+        }
+    }
+}
+function createListTable(user, taskListArray) {
+    return new ListTable(user, taskListArray)
+}
+
+function uniqueIDGeneratorMixin(superclass) {
+    return class uniqueIDGeneratorMixin extends superclass {
+        constructor() {
+            super(...arguments);
+        }
+
+        static __generator__ = (function* () {
+            let i = 1;
+            while (true) yield i++;
+        })()
+
+        async nextUniqueID() {
+            return uniqueIDGeneratorMixin.__generator__.next().value;
+        }
+    }
+}
+
+class UniqueIDVirtualStorage {
+
+    constructor(copyFunc) {
+        if (typeof copyFunc !== "function") throw new Error("Invalid Parameter: copyFunc must be a function that"
+            + " generated a deep copy of uniqueID object.");
+
+        this.__copyFunc__ = copyFunc;
+        this.__virtualDB__ = {}
+    }
+
+    async create(uniqueIDObj) {
+        if (this.__virtualDB__[uniqueIDObj.uid] != null) return false;
+        this.__virtualDB__[uniqueIDObj.uid] = this.__copyFunc__(uniqueIDObj);
+        return true;
+    }
+
+    async read(uniqueID) {
+        const uniqueIDObj = this.__virtualDB__[uniqueID];
+        return (uniqueIDObj != null) ? this.__copyFunc__(uniqueIDObj) : uniqueIDObj;
+    }
+
+    async readAll() {
         return Object.values(this.__virtualDB__)
-            .map(user => users.create(user.username, user.name, user.dateCreated));
+            .map(uniqueIDObj => this.__copyFunc__(uniqueIDObj));
     }
 
-    remove(uniqueID) {
-        if (this.__virtualDB__[uniqueID] == null) return false;
-        
-        delete this.__virtualDB__[uniqueID];
+    async update(uniqueIDObj) {
+        if (this.__virtualDB__[uniqueIDObj.uid] == null) return false;
+        this.__virtualDB__[uniqueIDObj.uid] = this.__copyFunc__(uniqueIDObj);
         return true;
     }
 
-    contains(uniqueID) {
-        return this.__virtualDB__[uniqueID] != null;
-    }
-}
-
-class UniqueIDObjSaver {
-    
-    constructor() {
-        this.__virtualDB__ = {}
-        this.__nextUniqueID__ = 1;
-    }
-
-    save(uniqueIDObj) {
-        this.__virtualDB__[uniqueIDObj.uid] = uniqueIDObj;
-        return true;
-    }
-
-    retrieve(uniqueID) {
-        return this.__virtualDB__[uniqueID];
-    }
-
-    retrieveAll() {
-        return Object.values(this.__virtualDB__);
-    }
-
-    remove(uniqueID) {
+    async delete(uniqueID) {
         if (this.__virtualDB__[uniqueID] == null) return false;
         delete this.__virtualDB__[uniqueID];
         return true;
     }
 
-    contains(uniqueID) {
+    async contains(uniqueID) {
         return this.__virtualDB__[uniqueID] != null;
-    }
-
-    nextUniqueID() {
-        return this.__nextUniqueID__++;
     }
 }
 
-const virtualUserDB = new VirtualUserDB();
-const virtualTaskListDB = new UniqueIDObjSaver();
-const virtualListTableDB = new UniqueIDObjSaver();
-module.exports = { 
+function copyUser(user) {
+    return Object.assign(users.create(user.username), user);
+}
+
+function copyTaskList(taskList) {
+    const taskListCopy = tasks.createList(taskList.uid, taskList.name, taskList.description);
+    taskList.toArray().forEach(task => taskListCopy.add(Object.assign(tasks.create(), task)));
+    return taskListCopy;
+}
+
+function copyListTable(listTable) {
+    const user = users.create(listTable.uid);
+    const listTableCopy = Object.assign(createListTable(user, []), listTable);
+    listTableCopy.__taskLists__ = Object.assign(new Object(), listTable.__taskLists__);
+    return listTableCopy;
+}
+
+const virtualUserDB = new UniqueIDVirtualStorage(copyUser);
+const virtualTaskListDB = new (uniqueIDGeneratorMixin(UniqueIDVirtualStorage))(copyTaskList);
+const virtualListTableDB = new UniqueIDVirtualStorage(copyListTable);
+module.exports = {
     user: virtualUserDB,
     taskList: virtualTaskListDB,
     listTable: virtualListTableDB,
