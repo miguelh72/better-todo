@@ -4,6 +4,8 @@ const users = require("./users.js");
 const tasks = require("./tasks.js");
 const persistence = require("./persistence.js");
 
+// TODO add logging of any errors
+
 /**
  * Asynchronously create new User object in storage.
  * @param {string} username 
@@ -39,6 +41,17 @@ async function asyncNewUser(username, name, dateCreated) {
 }
 
 /**
+ * Asynchronously update User object in storage.
+ * @param {User} user 
+ * @returns {boolean} True if successful.
+ * @throws /Missing Resource/ if user does not exist in storage.
+ */
+async function asyncUpdateUser(user) {
+    await persistence.asyncUpdateUser(user);
+    return true;
+}
+
+/**
  * Asynchronously fetch/read User object from storage.
  * @param {string} username 
  * @returns {Promise<User>} User object or false if missing resource in storage.
@@ -54,17 +67,6 @@ async function asyncRetrieveUser(username) {
 }
 
 /**
- * Asynchronously update User object in storage.
- * @param {User} user 
- * @returns {boolean} True if successful.
- * @throws /Missing Resource/ if user does not exist in storage.
- */
-async function asyncUpdateUser(user) {
-    await persistence.asyncUpdateUser(user);
-    return true;
-}
-
-/**
  * Asynchronously delete User object from storage.
  * @param {User} user 
  * @returns {boolean} True if successful, false if missing resource in storage.
@@ -72,14 +74,33 @@ async function asyncUpdateUser(user) {
 async function asyncDeleteUser(user) {
     try {
         const userListTable = await persistence.asyncReadListTable(user.uid);
-        for (let taskListID of userListTable.getListIDs()) {
-            await persistence.asyncDeleteTaskList(taskListID);
-        }
+        await Promise.all(
+            userListTable.getListIDs().map(taskListID => persistence.asyncDeleteTaskList(taskListID))
+        );
         await persistence.asyncDeleteListTable(user.uid);
+        return await persistence.asyncDeleteUser(user.uid);
     } catch (error) {
-        if (!/Missing Resource/.test(error.message)) throw error;
+        if (/Missing Resource/.test(error.message)) { return false }
+        else { throw error; }
     }
-    return await persistence.asyncDeleteUser(user.uid);
+}
+
+async function asyncNewTaskList(userUID, name, description) {
+    const [taskListID, listTable] = await Promise.all([
+        await persistence.asyncNextUniqueTaskListID(),
+        await persistence.asyncReadListTable(userUID),
+    ]);
+    const taskList = tasks.createList(taskListID, name, description);
+    listTable.add(taskList);
+    try {
+        await persistence.asyncCreateTaskList(taskList);
+        await persistence.asyncUpdateListTable(listTable);
+        return taskList;
+    } catch (error) {
+        // Cleanup potentially saved resources
+        await persistence.asyncDeleteTaskList(taskList);
+        throw error;
+    }
 }
 
 module.exports = {
@@ -87,4 +108,6 @@ module.exports = {
     asyncRetrieveUser,
     asyncUpdateUser,
     asyncDeleteUser,
+
+    asyncNewTaskList,
 };

@@ -6,6 +6,7 @@ const controller = require("./app_controller.js");
 const validate = require("./validation.js");
 const persistence = require("./persistence.js");
 const users = require("./users.js");
+const tasks = require("./tasks.js");
 
 async function cleanupPersistence() {
     await Promise.all(
@@ -28,11 +29,16 @@ const testUserInfo = {
     dateCreated: new Date("02/19/2005"),
 };
 
+const testTaskListInfo = {
+    name: "my task list",
+    description: "custom task list",
+};
+
 /** Create User */
 
 async function testUserCreation(user) {
     expect(validate.user(user)).toBe(true);
-    
+
     const userListTable = await persistence.asyncReadListTable(user.uid);
     expect(validate.listTable(userListTable)).toBe(true);
 
@@ -54,15 +60,13 @@ test("Create a new user.", async () => {
     await cleanupPersistence();
 });
 
-test("Try to create a bad user.", async () => {
+test("Try to create an invalid user.", async () => {
     await expect(controller.asyncNewUser("73mike", testUserInfo.name, testUserInfo.dateCreated))
         .rejects.toThrow(/Invalid Format/);
     await expect(controller.asyncNewUser(testUserInfo.username, "mike73 Hernan", testUserInfo.dateCreated))
         .rejects.toThrow(/Invalid Format/);
     await expect(controller.asyncNewUser(testUserInfo.username, testUserInfo.name, new Object()))
         .rejects.toThrow(/Invalid Parameter/);
-
-    await cleanupPersistence();
 })
 
 test("Create user with existing username", async () => {
@@ -152,3 +156,73 @@ test("Try to delete user that does not exist in storage.", async () => {
     await expect(controller.asyncDeleteUser(userNotStored)).resolves.toBe(false);
 });
 
+/** Create Task List */
+
+async function testTaskListCreation(user, taskList) {
+    expect(validate.uniqueID(taskList.uid)).toBe(true);
+    const newTaskList = await persistence.asyncReadTaskList(taskList.uid);
+    expect(newTaskList.name).toBe(testTaskListInfo.name);
+    expect(newTaskList.description).toBe(testTaskListInfo.description);
+}
+
+test("Create new task list", async () => {
+    const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
+
+    const newTaskList = await controller.asyncNewTaskList(
+        user.uid,
+        testTaskListInfo.name,
+        testTaskListInfo.description
+    );
+    testTaskListCreation(user, newTaskList);
+    const userListTable = await persistence.asyncReadListTable(user.uid);
+    expect(userListTable.getListIDs()[1]).toBe(newTaskList.uid);
+
+    await cleanupPersistence();
+});
+
+test("Try to create an invalid task list", async () => {
+    const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
+
+    await expect(controller.asyncNewTaskList("j&jf87", testTaskListInfo.name, testTaskListInfo.description))
+        .rejects.toThrow(/Invalid Format/);
+    await expect(controller.asyncNewTaskList(user.uid, "My list 72", testTaskListInfo.description))
+        .rejects.toThrow(/Invalid Format/);
+    await expect(controller.asyncNewTaskList(user.uid, testTaskListInfo.name, new Object()))
+        .rejects.toThrow(/Invalid Parameter/);
+
+    await cleanupPersistence();
+});
+
+test("Create many task lists simultaneously", async () => {
+    const numTaskLists = 100;
+    const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
+
+    const taskListArray = await Promise.all(
+        [...Array(numTaskLists).keys()].map(
+            num => controller.asyncNewTaskList(user.uid, testTaskListInfo.name, testTaskListInfo.description)
+        )
+    );
+
+    for (let taskList of taskListArray) await testTaskListCreation(user, taskList);
+
+    await cleanupPersistence();
+});
+
+/** Read Task List */
+
+/* test("Retrieve existing task list", async () => {
+    const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
+    const {newTaskListID: uid} = await controller.asyncNewTaskList(
+        user.uid,
+        testTaskListInfo.name,
+        testTaskListInfo.description
+    );
+
+
+
+    await cleanupPersistence();
+})
+
+test("Try to retrieve task list not in storage.", async () => {
+    throw new Error("TODO");
+}); */
