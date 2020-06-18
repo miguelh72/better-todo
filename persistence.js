@@ -161,20 +161,20 @@ module.exports = {
     asyncCreateUser,
     asyncReadUser,
     asyncReadAllUsers,
-    asyncUpdateUser, // TODO add unit tests
+    asyncUpdateUser,
     asyncDeleteUser,
 
     asyncNextUniqueTaskListID,
     asyncCreateTaskList,
     asyncReadTaskList,
-    asyncReadAllTaskList, // TODO add unit tests
+    asyncReadAllTaskList,
     asyncUpdateTaskList,
     asyncDeleteTaskList,
 
     createListTable,
     asyncCreateListTable,
     asyncReadListTable,
-    asyncReadAllListTable, // TODO add unit tests
+    asyncReadAllListTable,
     asyncUpdateListTable,
     asyncDeleteListTable,
 };
