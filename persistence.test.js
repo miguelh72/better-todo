@@ -249,8 +249,8 @@ test("Add and remove from list table", () => {
     taskListArray.forEach(taskList => expect(listTableListIDs.includes(taskList.uid)).toBe(true));
 
     for (let taskListIndexToRemove of taskListIndeciesToRemove) {
-        expect(listTable.remove(taskListArray[taskListIndexToRemove])).toBe(true);
-        expect(listTable.remove(taskListArray[taskListIndexToRemove])).toBe(false); // not in list
+        expect(listTable.remove(taskListArray[taskListIndexToRemove].uid)).toBe(true);
+        expect(listTable.remove(taskListArray[taskListIndexToRemove].uid)).toBe(false); // not in list
         listTableListIDs = listTable.getListIDs();
         expect(listTableListIDs.includes(taskListArray[taskListIndexToRemove])).toBe(false);
     }

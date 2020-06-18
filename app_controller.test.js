@@ -7,6 +7,7 @@ const validate = require("./validation.js");
 const persistence = require("./persistence.js");
 const users = require("./users.js");
 const tasks = require("./tasks.js");
+const { task } = require("./validation.js");
 
 async function cleanupPersistence() {
     await Promise.all(
@@ -143,7 +144,7 @@ test("Delete User from storage", async () => {
     const userListTable = await persistence.asyncReadListTable(user.uid);
     const defaultTaskList = await persistence.asyncReadTaskList(userListTable.getListIDs()[0]);
 
-    await expect(controller.asyncDeleteUser(user)).resolves.toBe(true);
+    await expect(controller.asyncDeleteUser(user.uid)).resolves.toBe(true);
     await expect(persistence.asyncReadListTable(user.uid)).rejects.toThrow(/Missing Resource/);
     await expect(persistence.asyncReadTaskList(defaultTaskList.uid)).rejects.toThrow(/Missing Resource/);
 
@@ -153,10 +154,10 @@ test("Delete User from storage", async () => {
 test("Try to delete user that does not exist in storage.", async () => {
     const userNotStored = users.create(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
 
-    await expect(controller.asyncDeleteUser(userNotStored)).resolves.toBe(false);
+    await expect(controller.asyncDeleteUser(userNotStored.uid)).resolves.toBe(false);
 });
 
-/** Create Task List */
+/** Create TaskList */
 
 async function testTaskListCreation(user, taskList) {
     expect(validate.uniqueID(taskList.uid)).toBe(true);
@@ -171,7 +172,7 @@ test("Create new task list", async () => {
     const newTaskList = await controller.asyncNewTaskList(
         user.uid,
         testTaskListInfo.name,
-        testTaskListInfo.description
+        testTaskListInfo.description,
     );
     testTaskListCreation(user, newTaskList);
     const userListTable = await persistence.asyncReadListTable(user.uid);
@@ -208,21 +209,139 @@ test("Create many task lists simultaneously", async () => {
     await cleanupPersistence();
 });
 
-/** Read Task List */
+/** Read TaskList */
 
-/* test("Retrieve existing task list", async () => {
+test("Retrieve existing task list", async () => {
     const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
-    const {newTaskListID: uid} = await controller.asyncNewTaskList(
+    const taskList = await controller.asyncNewTaskList(
         user.uid,
         testTaskListInfo.name,
-        testTaskListInfo.description
+        testTaskListInfo.description,
     );
 
-
+    await expect(controller.asyncRetrieveTaskList(taskList.uid)).resolves.toEqual(taskList);
 
     await cleanupPersistence();
 })
 
 test("Try to retrieve task list not in storage.", async () => {
+    const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
+    const taskListNotStored = tasks.createList(user.uid, testTaskListInfo.name, testTaskListInfo.description);
+
+    await expect(controller.asyncRetrieveTaskList(taskListNotStored.uid)).resolves.toBe(false);
+
+    await cleanupPersistence();
+});
+
+/** Update TaskList */
+
+// TODO protect against a user updating another user's task list
+
+test("Update task list", async () => {
+    const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
+    const taskList = await controller.asyncNewTaskList(
+        user.uid,
+        testTaskListInfo.name,
+        testTaskListInfo.description,
+    );
+    taskList.add(tasks.create());
+    taskList.name = "A better name";
+    taskList.description = "A better description";
+
+    await expect(controller.asyncUpdateTaskList(user.uid, taskList)).resolves.toBe(true);
+    await expect(controller.asyncRetrieveTaskList(taskList.uid)).resolves.toEqual(taskList);
+
+    await cleanupPersistence();
+})
+
+test("Try to update task list that does not exist", async () => {
+    const user = users.create(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
+    const taskListNotStored = tasks.createList(user.uid, testTaskListInfo.name, testTaskListInfo.description);
+
+    await expect(controller.asyncUpdateTaskList(user.uid, taskListNotStored)).rejects.toThrow(/Missing Resource/);
+
+    await cleanupPersistence();
+});
+
+test("Try to update task list that belongs to another user", async () => {
+    const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
+    const user2 = await controller.asyncNewUser(testUserInfo.username + "2");
+    const taskList2 = await controller.asyncNewTaskList(
+        user2.uid,
+        "another task list name",
+        "another description",
+    );
+
+    await expect(controller.asyncRetrieveTaskList(taskList2.uid)).resolves.toEqual(taskList2);
+
+    taskList2.name = "better name";
+    taskList2.description = "better description";
+
+    await expect(controller.asyncUpdateTaskList(user.uid, taskList2)).rejects.toThrow(/Unauthorized Request/);
+    await expect(controller.asyncRetrieveTaskList(taskList2.uid)).resolves.not.toEqual(taskList2);
+
+    await cleanupPersistence();
+});
+
+/** Delete TaskList */
+
+test("Delete task list from storage", async () => {
+    const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
+    const taskList = await controller.asyncNewTaskList(
+        user.uid,
+        testTaskListInfo.name,
+        testTaskListInfo.description,
+    );
+
+    await expect(controller.asyncDeleteTaskList(user.uid, taskList.uid)).resolves.toBe(true);
+    await expect(controller.asyncRetrieveTaskList(taskList.uid)).resolves.toBe(false);
+
+    await cleanupPersistence();
+});
+
+test("Try to delete task list that does not exist in storage.", async () => {
+    const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
+    const taskListNotStored = tasks.createList(user.uid, testTaskListInfo.name, testTaskListInfo.description);
+
+    await expect(controller.asyncDeleteTaskList(user.uid, taskListNotStored.uid)).resolves.toBe(false);
+
+    const userNotStored = users.create(testUserInfo.username + "2");
+    const taskList = await controller.asyncNewTaskList(
+        user.uid,
+        testTaskListInfo.name,
+        testTaskListInfo.description,
+    );
+
+    await expect(controller.asyncDeleteTaskList(userNotStored.uid, taskList.uid)).rejects.toThrow(/Missing Resource/);
+    await expect(controller.asyncRetrieveTaskList(taskList.uid)).resolves.toEqual(taskList);
+
+    await cleanupPersistence();
+});
+
+test("Try to delete task list that belongs to another user", async () => {
+    const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
+    const taskList = await controller.asyncNewTaskList(
+        user.uid,
+        testTaskListInfo.name,
+        testTaskListInfo.description,
+    );
+    const user2 = await controller.asyncNewUser(testUserInfo.username + "2");
+    const taskList2 = await controller.asyncNewTaskList(
+        user2.uid,
+        "another task list name",
+        "another description",
+    );
+
+    await expect(controller.asyncDeleteTaskList(user.uid, taskList2.uid)).rejects.toThrow(/Unauthorized Request/);
+    await expect(controller.asyncDeleteTaskList(user2.uid, taskList.uid)).rejects.toThrow(/Unauthorized Request/);
+    await expect(controller.asyncRetrieveTaskList(taskList.uid)).resolves.toEqual(taskList);
+    await expect(controller.asyncRetrieveTaskList(taskList2.uid)).resolves.toEqual(taskList2);
+
+    await cleanupPersistence();
+});
+
+/** Create Task */
+
+test("Create task from user values", () => {
     throw new Error("TODO");
-}); */
+});

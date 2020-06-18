@@ -29,16 +29,20 @@ class ListTable extends mixins.UniqueID(Object) {
         return true;
     }
 
-    remove(taskList) {
-        validate.taskList(taskList);
+    remove(taskListID) {
+        validate.uniqueID(taskListID);
 
-        if (this.__taskLists__[taskList.uid] == null) return false;
-        delete this.__taskLists__[taskList.uid];
+        if (this.__taskLists__[taskListID] == null) return false;
+        delete this.__taskLists__[taskListID];
         return true;
     }
 
     getListIDs() {
         return Object.keys(this.__taskLists__).map(id => parseInt(id));
+    }
+
+    contains(taskListID) {
+        return this.__taskLists__[taskListID] != null;
     }
 
     get length() { return Object.keys(this.__taskLists__).length; }
