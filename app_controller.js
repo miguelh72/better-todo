@@ -93,7 +93,7 @@ async function asyncDeleteUser(userUID) {
  * @param {string} description 
  * @returns {Promise<TaskList>} TaskList object
  */
-async function asyncNewTaskList(userUID, name, description) {
+async function asyncNewTaskList(userUID, name = "New Task List", description = "") {
     validate.username(userUID);
 
     const [taskListID, listTable] = await Promise.all([
@@ -180,6 +180,10 @@ async function asyncDeleteTaskList(userUID, taskListUID) {
     }
 }
 
+function createTask(description = "", dateCreated = new Date(), dueDate = null, isImportant = false, isUrgent = false) {
+    return tasks.create(description, dateCreated, dueDate, isImportant, isUrgent);
+}
+
 module.exports = {
     asyncNewUser,
     asyncRetrieveUser,
@@ -188,7 +192,8 @@ module.exports = {
 
     asyncNewTaskList,
     asyncRetrieveTaskList,
-    //asyncRetrieveMatchingTaskLists TODO
     asyncUpdateTaskList,
     asyncDeleteTaskList,
+
+    createTask,
 };

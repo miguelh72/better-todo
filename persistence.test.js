@@ -22,11 +22,11 @@ async function cleanupPersistence() {
 
 /** Unique IDs */
 
-async function testUniqueIDFactory(asyncNextIDFunc) {
+test("Get next available unique task list ID", async () => {
     const numIDs = 100;
 
     const uniqueIDArray = await Promise.all(
-        [...Array(numIDs)].map(_ => asyncNextIDFunc())
+        [...Array(numIDs)].map(_ => persistence.asyncNextUniqueTaskListID())
     );
 
     while (uniqueIDArray.length !== 0) {
@@ -34,10 +34,6 @@ async function testUniqueIDFactory(asyncNextIDFunc) {
         expect(validate.uniqueID(uniqueID)).toBe(true);
         expect(uniqueIDArray.includes(uniqueID)).toBe(false);
     }
-}
-
-test("Get next available unique task list ID", async () => {
-    await testUniqueIDFactory(persistence.asyncNextUniqueTaskListID);
 });
 
 /** Users */

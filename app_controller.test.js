@@ -7,7 +7,6 @@ const validate = require("./validation.js");
 const persistence = require("./persistence.js");
 const users = require("./users.js");
 const tasks = require("./tasks.js");
-const { task } = require("./validation.js");
 
 async function cleanupPersistence() {
     await Promise.all(
@@ -235,8 +234,6 @@ test("Try to retrieve task list not in storage.", async () => {
 
 /** Update TaskList */
 
-// TODO protect against a user updating another user's task list
-
 test("Update task list", async () => {
     const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
     const taskList = await controller.asyncNewTaskList(
@@ -342,6 +339,28 @@ test("Try to delete task list that belongs to another user", async () => {
 
 /** Create Task */
 
+const testTaskInfo = {
+    description: "My task description",
+    dateCreated: new Date("03/03/2019"),
+    dueDate: new Date("11/11/2030"),
+    isImportant: true,
+    isUrgent: true,
+}
+
 test("Create task from user values", () => {
-    throw new Error("TODO");
+    const task = tasks.create(
+        testTaskInfo.description, 
+        testTaskInfo.dateCreated, 
+        testTaskInfo.dueDate, 
+        testTaskInfo.isImportant, 
+        testTaskInfo.isUrgent,
+    );
+    
+    expect(controller.createTask(
+        testTaskInfo.description, 
+        testTaskInfo.dateCreated, 
+        testTaskInfo.dueDate, 
+        testTaskInfo.isImportant, 
+        testTaskInfo.isUrgent
+    )).toEqual(task);
 });

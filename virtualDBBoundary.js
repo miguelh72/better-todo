@@ -49,12 +49,7 @@ class ListTable extends mixins.UniqueID(Object) {
     set length(_) { throw new Error("Assignment Error: length is not updatable.") }
 
     static __reduceTaskList__(taskList) {
-        return {
-            // TODO add tests for these once controller requires them
-            //achived: taskList.archived,
-            //completed: taskList.completed,
-            //length: taskList.length,
-        }
+        return {}
     }
 }
 function createListTable(user, taskListArray) {

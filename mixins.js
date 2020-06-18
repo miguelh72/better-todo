@@ -7,8 +7,6 @@ function mix(baseClass, ...mixins) {
     return mixins.reduce((base, mixin) => mixin(base), baseClass);
 }
 
-// TODO create error module. Create constructor functions that require expected and received and print useful message.
-
 function Creatable(superclass) {
     return class Creatable extends superclass {
 
