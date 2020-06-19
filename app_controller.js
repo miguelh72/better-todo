@@ -1,9 +1,8 @@
 "use strict";
 
-const users = require("./users.js");
 const tasks = require("./tasks.js");
+const { User } = require("./data_models");
 const persistence = require("./persistence.js");
-const validate = require("./validation.js");
 
 // TODO add logging of any errors
 
@@ -17,12 +16,13 @@ const validate = require("./validation.js");
 async function asyncNewUser(username, name, dateCreated) {
     let newUser, defaultTaskList, userListTable;
     try {
-        newUser = users.create(username, name, dateCreated);
+        newUser = new User(username, name, dateCreated);
 
         const defaultTaskListID = await persistence.asyncNextUniqueTaskListID();
         defaultTaskList = tasks.createList(defaultTaskListID, "default", "Default task list.");
         await persistence.asyncCreateTaskList(defaultTaskList);
 
+        // TODO can both calls below be integrated and hide createListTable call?
         userListTable = persistence.createListTable(newUser, [defaultTaskList]);
         await persistence.asyncCreateListTable(userListTable);
 
@@ -94,8 +94,6 @@ async function asyncDeleteUser(userUID) {
  * @returns {Promise<TaskList>} TaskList object
  */
 async function asyncNewTaskList(userUID, name = "New Task List", description = "") {
-    validate.username(userUID);
-
     const [taskListID, listTable] = await Promise.all([
         await persistence.asyncNextUniqueTaskListID(),
         await persistence.asyncReadListTable(userUID),
@@ -157,8 +155,6 @@ async function asyncUpdateTaskList(userUID, taskList) {
  * @throws /Unauthorized Request/ if attempting to delete another user's task list.
  */
 async function asyncDeleteTaskList(userUID, taskListUID) {
-    validate.username(userUID);
-
     let userListTable = await persistence.asyncReadListTable(userUID);
     try {
         const contained = userListTable.remove(taskListUID);

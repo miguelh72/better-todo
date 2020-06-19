@@ -2,10 +2,11 @@
 
 // TODO add login system layer
 
-const controller = require("./app_controller.js");
-const validate = require("./validation.js");
-const persistence = require("./persistence.js");
-const users = require("./users.js");
+const controller = require("./app_controller");
+const validate = require("./validation");
+const { User } = require("./data_models");
+const persistence = require("./persistence");
+
 const tasks = require("./tasks.js");
 
 async function cleanupPersistence() {
@@ -129,7 +130,7 @@ test("Update User name", async () => {
 })
 
 test("Try to update User that does not exist", async () => {
-    const user = users.create(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
+    const user = new User(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
 
     await expect(controller.asyncUpdateUser(user)).rejects.toThrow(/Missing Resource/);
 
@@ -151,7 +152,7 @@ test("Delete User from storage", async () => {
 });
 
 test("Try to delete user that does not exist in storage.", async () => {
-    const userNotStored = users.create(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
+    const userNotStored = new User(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
 
     await expect(controller.asyncDeleteUser(userNotStored.uid)).resolves.toBe(false);
 });
@@ -252,7 +253,7 @@ test("Update task list", async () => {
 })
 
 test("Try to update task list that does not exist", async () => {
-    const user = users.create(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
+    const user = new User(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
     const taskListNotStored = tasks.createList(user.uid, testTaskListInfo.name, testTaskListInfo.description);
 
     await expect(controller.asyncUpdateTaskList(user.uid, taskListNotStored)).rejects.toThrow(/Missing Resource/);
@@ -302,7 +303,7 @@ test("Try to delete task list that does not exist in storage.", async () => {
 
     await expect(controller.asyncDeleteTaskList(user.uid, taskListNotStored.uid)).resolves.toBe(false);
 
-    const userNotStored = users.create(testUserInfo.username + "2");
+    const userNotStored = new User(testUserInfo.username + "2");
     const taskList = await controller.asyncNewTaskList(
         user.uid,
         testTaskListInfo.name,

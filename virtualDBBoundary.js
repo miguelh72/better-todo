@@ -1,9 +1,10 @@
 "use strict";
 
-const users = require("./users.js");
+const validate = require("./validation.js");
+const { User } = require("./data_models");
+
 const tasks = require("./tasks.js");
 const mixins = require("./mixins.js");
-const validate = require("./validation.js");
 
 // WARNING: Below is copy paste from persistence module. Only reason I'm doing this is because this is a temporary
 // emulation of a db boundary and will be refactored once a db is chosen.
@@ -51,9 +52,6 @@ class ListTable extends mixins.UniqueID(Object) {
     static __reduceTaskList__(taskList) {
         return {}
     }
-}
-function createListTable(user, taskListArray) {
-    return new ListTable(user, taskListArray)
 }
 
 function uniqueIDGeneratorMixin(superclass) {
@@ -117,7 +115,7 @@ class UniqueIDVirtualStorage {
 }
 
 function copyUser(user) {
-    return Object.assign(users.create(user.username), user);
+    return Object.assign(new User(user.username), user);
 }
 
 function copyTaskList(taskList) {
@@ -127,8 +125,8 @@ function copyTaskList(taskList) {
 }
 
 function copyListTable(listTable) {
-    const user = users.create(listTable.uid);
-    const listTableCopy = Object.assign(createListTable(user, []), listTable);
+    const user = new User(listTable.uid);
+    const listTableCopy = Object.assign(new ListTable(user, []), listTable);
     listTableCopy.__taskLists__ = Object.assign(new Object(), listTable.__taskLists__);
     return listTableCopy;
 }
