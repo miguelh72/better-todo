@@ -37,15 +37,7 @@ class ListContainer {
     set length(_) { throw new Error("Assignment Error: length is not updatable.") }
 }
 
-class Task extends mixins.mix(
-    Object,
-    mixins.Creatable,
-    mixins.Updatable,
-    mixins.Description,
-    mixins.Importance,
-    mixins.Urgency,
-    mixins.Archivable,
-) { }
+
 
 class TaskContainer extends ListContainer {
 

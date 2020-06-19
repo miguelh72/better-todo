@@ -1,7 +1,7 @@
 "use strict";
 
 const validate = require("./validation.js");
-const { User } = require("./data_models");
+const { User, Task } = require("./data_models");
 
 const tasks = require("./tasks.js");
 const mixins = require("./mixins.js");
@@ -120,7 +120,7 @@ function copyUser(user) {
 
 function copyTaskList(taskList) {
     const taskListCopy = tasks.createList(taskList.uid, taskList.name, taskList.description);
-    taskList.toArray().forEach(task => taskListCopy.add(Object.assign(tasks.create(), task)));
+    taskList.toArray().forEach(task => taskListCopy.add(Object.assign(new Task(), task)));
     return taskListCopy;
 }
 

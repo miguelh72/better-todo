@@ -1,7 +1,7 @@
 "use strict";
 
 const tasks = require("./tasks.js");
-const { User } = require("./data_models");
+const { User, Task } = require("./data_models");
 const persistence = require("./persistence.js");
 
 // TODO add logging of any errors
@@ -177,7 +177,7 @@ async function asyncDeleteTaskList(userUID, taskListUID) {
 }
 
 function createTask(description = "", dateCreated = new Date(), dueDate = null, isImportant = false, isUrgent = false) {
-    return tasks.create(description, dateCreated, dueDate, isImportant, isUrgent);
+    return new Task(description, dateCreated, dueDate, isImportant, isUrgent);
 }
 
 module.exports = {

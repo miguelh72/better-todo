@@ -1,9 +1,13 @@
+"use strict";
+
+const { Task } = require("./data_models");
+
 const tasks = require("./tasks.js");
 
 /** Tasks */
 
 test("Create task with default values", () => {
-  const task = tasks.create();
+  const task = new Task();
   expect(task).toBeTruthy();
   expect(task.description).toBe("");
   expect(task.dateCreated instanceof Date).toBe(true);
@@ -21,7 +25,7 @@ test("Create task with defined values", () => {
   const dueDate = new Date();
   dueDate.setDate(dueDate.getDate() + 1);
   
-  const task = tasks.create(desc, dateCreated, dueDate, true, true);
+  const task = new Task(desc, dateCreated, dueDate, true, true);
   expect(task.description).toBe(desc);
   expect(task.dateCreated).toBe(dateCreated);
   expect(task.dateUpdated).toBe(dateCreated);
@@ -37,7 +41,7 @@ test("Update task content", () => {
   const updatedContent = "Clean and refactor code.";
   const date = new Date();
   const updateDate = new Date();
-  const task = tasks.create(content, date);
+  const task = new Task(content, date);
   const dueDate = new Date();
   dueDate.setDate(dueDate.getDate() + 1);
   
@@ -77,8 +81,8 @@ test("Create list of tasks with default values", () => {
 
 test("Add and retrieve tasks from task list", () => {
   const taskList = tasks.createList(1);
-  const task1 = tasks.create();
-  const task2 = tasks.create();
+  const task1 = new Task();
+  const task2 = new Task();
   taskList.add(task1);
   taskList.add(task2);
   
@@ -90,8 +94,8 @@ test("Add and retrieve tasks from task list", () => {
 
 test("Remove tasks from task list", () => {
   const taskList = tasks.createList(1);
-  const task1 = tasks.create();
-  const task2 = tasks.create();
+  const task1 = new Task();
+  const task2 = new Task();
   taskList.add(task1);
   taskList.add(task2);
   
@@ -137,8 +141,8 @@ test("Create with and update task list description.", () => {
 
 test("Completing and archiving task list.", () => {
     const taskList = tasks.createList(1);
-    const task1 = tasks.create();
-    const task2 = tasks.create();
+    const task1 = new Task();
+    const task2 = new Task();
     taskList.add(task1);
     taskList.add(task2);
     

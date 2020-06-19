@@ -1,7 +1,7 @@
 const validate = require("./validation.js");
 const persistence = require("./persistence.js");
 const mixins = require("./mixins.js");
-const { User } = require("./data_models");
+const { User, Task } = require("./data_models");
 
 const tasks = require("./tasks.js");
 
@@ -74,7 +74,7 @@ test("Validate user name input", () => {
 });
 
 test("Validate task input", () => {
-    const task = tasks.create();
+    const task = new Task();
 
     expect(validate.task(task)).toBe(true);
     expect(() => validate.task(new Object())).toThrow(/Invalid Parameter/);

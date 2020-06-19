@@ -4,7 +4,7 @@
 
 const controller = require("./app_controller");
 const validate = require("./validation");
-const { User } = require("./data_models");
+const { User, Task } = require("./data_models");
 const persistence = require("./persistence");
 
 const tasks = require("./tasks.js");
@@ -242,7 +242,7 @@ test("Update task list", async () => {
         testTaskListInfo.name,
         testTaskListInfo.description,
     );
-    taskList.add(tasks.create());
+    taskList.add(new Task());
     taskList.name = "A better name";
     taskList.description = "A better description";
 
@@ -349,7 +349,7 @@ const testTaskInfo = {
 }
 
 test("Create task from user values", () => {
-    const task = tasks.create(
+    const task = new Task(
         testTaskInfo.description, 
         testTaskInfo.dateCreated, 
         testTaskInfo.dueDate, 
