@@ -1,75 +1,7 @@
 "use strict";
 
-const validate = require("./validation.js");
-const { User, Task } = require("./data_models");
-
-const tasks = require("./tasks.js");
-const mixins = require("./mixins.js");
-
-// WARNING: Below is copy paste from persistence module. Only reason I'm doing this is because this is a temporary
-// emulation of a db boundary and will be refactored once a db is chosen.
-class ListTable extends mixins.UniqueID(Object) {
-
-    constructor(user, taskListArray) {
-        validate.user(user);
-        taskListArray.forEach(taskList => validate.taskList(taskList));
-
-        super({ uniqueID: user.uid });
-        this.userID = user.uid;
-        this.__taskLists__ = taskListArray.reduce((listDict, taskList) => {
-            listDict[taskList.uid] = ListTable.__reduceTaskList__(taskList);
-            return listDict;
-        }, {});
-        this.implementsListTable = true;
-    }
-
-    add(taskList) {
-        validate.taskList(taskList);
-
-        this.__taskLists__[taskList.uid] = ListTable.__reduceTaskList__(taskList);
-        return true;
-    }
-
-    remove(taskListID) {
-        validate.uniqueID(taskListID);
-
-        if (this.__taskLists__[taskListID] == null) return false;
-        delete this.__taskLists__[taskListID];
-        return true;
-    }
-
-    getListIDs() {
-        return Object.keys(this.__taskLists__).map(id => parseInt(id));
-    }
-
-    contains(taskListID) {
-        return this.__taskLists__[taskListID] != null;
-    }
-
-    get length() { return Object.keys(this.__taskLists__).length; }
-    set length(_) { throw new Error("Assignment Error: length is not updatable.") }
-
-    static __reduceTaskList__(taskList) {
-        return {}
-    }
-}
-
-function uniqueIDGeneratorMixin(superclass) {
-    return class uniqueIDGeneratorMixin extends superclass {
-        constructor() {
-            super(...arguments);
-        }
-
-        static __generator__ = (function* () {
-            let i = 1;
-            while (true) yield i++;
-        })()
-
-        async nextUniqueID() {
-            return uniqueIDGeneratorMixin.__generator__.next().value;
-        }
-    }
-}
+const mixins = require("./mixins");
+const { User, Task, TaskList, ListTable } = require("./data_models");
 
 class UniqueIDVirtualStorage {
 
@@ -119,8 +51,15 @@ function copyUser(user) {
 }
 
 function copyTaskList(taskList) {
-    const taskListCopy = tasks.createList(taskList.uid, taskList.name, taskList.description);
-    taskList.toArray().forEach(task => taskListCopy.add(Object.assign(new Task(), task)));
+    const taskListCopy = new TaskList(taskList.uid, taskList.name, taskList.description);
+    Object.assign(taskListCopy, taskList);
+
+    taskListCopy.__container__ = {};
+    Object.entries(taskList.__container__).forEach(([key, task]) => {
+        taskListCopy.__container__[key] = Object.assign(new Task(), task);
+    });
+    // TODO will nextUniqueID behave the same between copy and original? Test this
+
     return taskListCopy;
 }
 
@@ -132,7 +71,7 @@ function copyListTable(listTable) {
 }
 
 const virtualUserDB = new UniqueIDVirtualStorage(copyUser);
-const virtualTaskListDB = new (uniqueIDGeneratorMixin(UniqueIDVirtualStorage))(copyTaskList);
+const virtualTaskListDB = new (mixins.UniqueIDGeneratorMixin(UniqueIDVirtualStorage))(copyTaskList);
 const virtualListTableDB = new UniqueIDVirtualStorage(copyListTable);
 module.exports = {
     user: virtualUserDB,

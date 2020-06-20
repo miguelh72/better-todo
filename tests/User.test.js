@@ -1,6 +1,6 @@
 "use strict";
 
-const { User } = require("./data_models");
+const { User } = require("../data_models");
 
 const mike = {username: "mike72", name: "Mike Hern", date: new Date()};
 const john = {username: "johndoe", name: "John Doe", date: new Date("01/01/2019")};

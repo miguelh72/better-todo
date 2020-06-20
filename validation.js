@@ -1,5 +1,7 @@
 "use strict";
 
+// TODO refactor out of class, no point
+
 class Validate {
     static personNameRegex = /^([^\W\d_]+\s*){1,}$/i;
     static usernameRegex = /^[^\W\d_]+\w{2,}$/i;
@@ -69,11 +71,11 @@ class Validate {
 
     static taskList(input) {
         return Validate.containsMixin(input, "TaskList",
-            "ListContainer",
             "UniqueID",
             "Description",
             "Nameable",
             "Archivable",
+            "RestrictedContainer",
         );
     }
 

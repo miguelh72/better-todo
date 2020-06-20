@@ -1,11 +1,8 @@
 "use strict";
 
-const persistence = require("./persistence.js");
-const validate = require("./validation.js");
-const { User, Task } = require("./data_models");
-
-const tasks = require("./tasks.js");
-
+const persistence = require("../persistence.js");
+const validate = require("../validation.js");
+const { User, Task, TaskList } = require("../data_models");
 
 async function cleanupPersistence() {
     await Promise.all(
@@ -144,17 +141,17 @@ test("Save and remove multiple users", async () => {
 /** Task Lists */
 
 test("Save and retrieve new task list", async () => {
-    const taskList = tasks.createList(111);
+    const taskList = new TaskList(111);
     taskList.add(new Task());
 
     await expect(persistence.asyncCreateTaskList(taskList)).resolves.toBe(true);
-    await expect(persistence.asyncReadTaskList(taskList.uid)).resolves.toEqual(taskList);
+    await expect(persistence.asyncReadTaskList(taskList.uid)).resolves.toMatchObject(taskList);
 
     await cleanupPersistence();
 });
 
 test("Attempted to create task list already in storage", async () => {
-    const taskList = tasks.createList(111);
+    const taskList = new TaskList(111);
     taskList.add(new Task());
 
     await expect(persistence.asyncCreateTaskList(taskList)).resolves.toBe(true);
@@ -171,7 +168,7 @@ test("Attempt to retrieve task list that doesnt exist", async () => {
 });
 
 test("Save and update new task list", async () => {
-    const taskList = tasks.createList(111, "my list", "my description");
+    const taskList = new TaskList(111, "my list", "my description");
     [...Array(10)].map(_ => taskList.add(new Task()));
 
     await expect(persistence.asyncCreateTaskList(taskList)).resolves.toBe(true);
@@ -188,7 +185,7 @@ test("Save and update new task list", async () => {
 });
 
 test("Attempt to update task list that doesnt exist", async () => {
-    const taskList = tasks.createList(111);
+    const taskList = new TaskList(111);
 
     await expect(persistence.asyncUpdateTaskList(taskList)).rejects.toThrow(/Missing Resource/);
 });
@@ -196,7 +193,7 @@ test("Attempt to update task list that doesnt exist", async () => {
 test("Save and retrieve multiple task lists", async () => {
     const numTaskLists = 100;
 
-    const taskListArray = [...Array(numTaskLists).keys()].map(uid => tasks.createList(uid));
+    const taskListArray = [...Array(numTaskLists).keys()].map(uid => new TaskList(uid));
 
     for (let taskList of taskListArray) {
         await expect(persistence.asyncCreateTaskList(taskList)).resolves.toBe(true);
@@ -212,7 +209,7 @@ test("Save and retrieve multiple task lists", async () => {
 test("Save multiple task lists and retrieve all", async () => {
     const numTaskLists = 100;
 
-    const taskListArray = [...Array(numTaskLists).keys()].map(uid => tasks.createList(uid));
+    const taskListArray = [...Array(numTaskLists).keys()].map(uid => new TaskList(uid));
 
     await Promise.all(taskListArray.map(taskList => persistence.asyncCreateTaskList(taskList)));
     
@@ -228,7 +225,7 @@ test("Save and remove task lists", async () => {
     const numTaskLists = 100;
     const indexTaskListToRemove = [0, 1, 5, 7, 47, 99];
 
-    const taskListArray = [...Array(numTaskLists).keys()].map(uid => tasks.createList(uid));
+    const taskListArray = [...Array(numTaskLists).keys()].map(uid => new TaskList(uid));
 
     for (let taskList of taskListArray) {
         await expect(persistence.asyncCreateTaskList(taskList)).resolves.toBe(true);
@@ -253,7 +250,7 @@ test("Create list table", () => {
     const numTaskLists = 5;
 
     const user = new User("mike72");
-    const taskListArray = [...Array(numTaskLists).keys()].map(uid => tasks.createList(uid));
+    const taskListArray = [...Array(numTaskLists).keys()].map(uid => new TaskList(uid));
     const listTable = persistence.createListTable(user, taskListArray);
 
     expect(listTable.userID).toBe(user.uid);
@@ -264,11 +261,11 @@ test("Create list table", () => {
 
 test("Add and remove from list table", () => {
     const numTaskLists = 5;
-    const taskListToAdd = tasks.createList(72);
+    const taskListToAdd = new TaskList(72);
     const taskListIndeciesToRemove = [0, 1, 4];
 
     const user = new User("mike72");
-    const taskListArray = [...Array(numTaskLists).keys()].map(uid => tasks.createList(uid));
+    const taskListArray = [...Array(numTaskLists).keys()].map(uid => new TaskList(uid));
     const listTable = persistence.createListTable(user, taskListArray);
 
     taskListArray.push(taskListToAdd);
@@ -289,7 +286,7 @@ test("Save new user's list table", async () => {
     const numTaskLists = 10;
     const user = new User("mike72");
     const taskListArray = [...Array(numTaskLists).keys()].map(uid => {
-        const taskList = tasks.createList(uid);
+        const taskList = new TaskList(uid);
         [...Array(numTasks)].map(_ => taskList.add(new Task()));
         return taskList;
     });
@@ -305,7 +302,7 @@ test("Attempt to save existing user's list table", async () => {
     const numTaskLists = 10;
     const user = new User("mike72");
     const taskListArray = [...Array(numTaskLists).keys()].map(uid => {
-        const taskList = tasks.createList(uid);
+        const taskList = new TaskList(uid);
         [...Array(numTasks)].map(_ => taskList.add(new Task()));
         return taskList;
     });
@@ -322,7 +319,7 @@ test("Save and retrieve new user's list table", async () => {
     const numTaskLists = 10;
     const user = new User("mike72");
     const taskListArray = [...Array(numTaskLists).keys()].map(uid => {
-        const taskList = tasks.createList(uid);
+        const taskList = new TaskList(uid);
         [...Array(numTasks)].map(_ => taskList.add(new Task()));
         return taskList;
     });
@@ -336,7 +333,7 @@ test("Save and retrieve new user's list table", async () => {
 
 test("Attempt to retrieve list table that doesn't exist in storage", async () => {
     const user = new User("mike72");
-    const taskListArray = [tasks.createList(111)];
+    const taskListArray = [new TaskList(111)];
     const listTable = persistence.createListTable(user, taskListArray);
 
     await expect(persistence.asyncReadListTable(listTable.uid)).rejects.toThrow(/Missing Resource/);
@@ -351,7 +348,7 @@ test("Save multiple list tables and retrieve all", async () => {
     for (let i = 0; i < numListTables; i++) {
         const taskListArray = [];
         for (let j = 0; j < numTaskListsPerTable; j++) {
-            taskListArray.push(tasks.createList(await persistence.asyncNextUniqueTaskListID()));
+            taskListArray.push(new TaskList(await persistence.asyncNextUniqueTaskListID()));
         }
         return persistence.createListTable(userArray[i], taskListArray);
     }
@@ -370,7 +367,7 @@ test("Update list table in storage", async () => {
     const numTaskLists = 10;
     const user = new User("mike72");
     const taskListArray = [...Array(numTaskLists).keys()].map(uid => {
-        const taskList = tasks.createList(uid);
+        const taskList = new TaskList(uid);
         [...Array(numTasks)].map(_ => taskList.add(new Task()));
         return taskList;
     });
@@ -379,7 +376,7 @@ test("Update list table in storage", async () => {
     await expect(persistence.asyncCreateListTable(listTable)).resolves.toBe(true);
     await expect(persistence.asyncReadListTable(listTable.uid)).resolves.toEqual(listTable);
 
-    listTable.add(tasks.createList(99));
+    listTable.add(new TaskList(99));
 
     await expect(persistence.asyncReadListTable(listTable.uid)).resolves.not.toEqual(listTable);
     await expect(persistence.asyncUpdateListTable(listTable)).resolves.toBe(true);
@@ -390,7 +387,7 @@ test("Update list table in storage", async () => {
 
 test("Attempt to update list table that doesnt exist in storage", async () => {
     const user = new User("mike72");
-    const taskListArray = [tasks.createList(111)];
+    const taskListArray = [new TaskList(111)];
     const listTable = persistence.createListTable(user, taskListArray);
 
     await expect(persistence.asyncUpdateListTable(listTable)).rejects.toThrow(/Missing Resource/);
@@ -406,7 +403,7 @@ test("Save and delete user's list table", async () => {
     for (let i = 0; i < numListTables; i++) {
         const taskListArray = [];
         for (let j = 0; j < numTaskListsPerTable; j++) {
-            taskListArray.push(tasks.createList(await persistence.asyncNextUniqueTaskListID()));
+            taskListArray.push(new TaskList(await persistence.asyncNextUniqueTaskListID()));
         }
         return persistence.createListTable(userArray[i], taskListArray);
     }

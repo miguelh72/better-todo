@@ -190,15 +190,103 @@ function Archivable(superclass) {
     }
 }
 
-module.exports = {
-    mix,
-    UniqueID,
-    Account,
-    Creatable,
-    Updatable,
-    Nameable,
-    Description,
-    Importance,
-    Urgency,
-    Archivable,
-};
+function UniqueIDGeneratorMixin(superclass) {
+    return class uniqueIDGeneratorMixin extends superclass {
+        constructor() {
+            super(...arguments);
+        }
+
+        static __generator__ = (function* () {
+            let i = 1;
+            while (true) yield i++;
+        })()
+
+        nextUniqueID() {
+            return uniqueIDGeneratorMixin.__generator__.next().value;
+        }
+    }
+}
+
+function RestrictedContainer(superclass) {
+    return class RestrictedContainer extends UniqueIDGeneratorMixin(superclass) {
+        constructor({
+            itemValidatorFunc = () => true,
+            comparatorFunc = (a, b) => a === b,
+        } = {}) {
+            if (typeof itemValidatorFunc !== "function") throw new Error("Invalid Parameter: itemValidatorFunc must be"
+                + "a function that takes in an object and outputs a boolean stating if item is of an allowed type in"
+                + " list.");
+            if (typeof comparatorFunc !== "function") throw new Error("Invalid Parameter: comparatorFunc must be a"
+                + " function that takes in two container items and outputs a boolean stating if they are logically"
+                + " equal.");
+
+            super(...arguments);
+            this.__isValidItem__ = itemValidatorFunc;
+            this.__areEqual__ = comparatorFunc;
+            this.__container__ = {};
+            this.__length__ = 0;
+            this.implementsRestrictedContainer = true;
+        }
+
+        __findKey__(item) {
+            if (item.implementsUniqueID) { // O(1)
+                if (this.__container__[item.uid]) return item.uid;
+            } else { // O(n)
+                for (let [key, value] of Object.entries(this.__container__)) {
+                    if (this.__areEqual__(item, value)) return key;
+                }
+            }
+        }
+
+        add(item) {
+            this.__isValidItem__(item);
+
+            const key = (item.implementsUniqueID) ? item.uid : this.nextUniqueID();
+            this.__container__[key] = item;
+            this.__length__++;
+            return true;
+        }
+
+        remove(item) {
+            if (!this.__isValidItem__(item)) return false;
+
+            const itemKey = this.__findKey__(item);
+            if (itemKey != null) {
+                delete this.__container__[itemKey];
+                this.__length__--;
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        contains(item) {
+            if (!this.__isValid__(item)) return false;
+
+            const itemKey = this.__findKey__(item);
+            return itemKey != null;
+        }
+
+        toArray() {
+            return Object.values(this.__container__);
+        }
+
+        get length() { return this.__length__; }
+        set length(_) { throw new Error("Assignment Error: length is not updatable.") }
+    }
+}
+
+    module.exports = {
+        mix,
+        UniqueID,
+        Account,
+        Creatable,
+        Updatable,
+        Nameable,
+        Description,
+        Importance,
+        Urgency,
+        Archivable,
+        UniqueIDGeneratorMixin,
+        RestrictedContainer,
+    };

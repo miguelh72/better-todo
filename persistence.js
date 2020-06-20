@@ -1,59 +1,8 @@
 "use strict";
 
 const validate = require("./validation.js");
-const mixins = require("./mixins.js");
+const { ListTable } = require("./data_models");
 const db = require("./virtualDBBoundary.js");
-
-class ListTable extends mixins.UniqueID(Object) {
-
-    constructor(user, taskListArray) {
-        validate.user(user);
-        taskListArray.forEach(taskList => validate.taskList(taskList));
-
-        super({ uniqueID: user.uid });
-        this.userID = user.uid;
-        this.__taskLists__ = taskListArray.reduce((listDict, taskList) => {
-            listDict[taskList.uid] = ListTable.__reduceTaskList__(taskList);
-            return listDict;
-        }, {});
-        this.implementsListTable = true;
-    }
-
-    add(taskList) {
-        validate.taskList(taskList);
-
-        this.__taskLists__[taskList.uid] = ListTable.__reduceTaskList__(taskList);
-        return true;
-    }
-
-    remove(taskListID) {
-        validate.uniqueID(taskListID);
-
-        if (this.__taskLists__[taskListID] == null) return false;
-        delete this.__taskLists__[taskListID];
-        return true;
-    }
-
-    getListIDs() {
-        return Object.keys(this.__taskLists__).map(id => parseInt(id));
-    }
-
-    contains(taskListID) {
-        return this.__taskLists__[taskListID] != null;
-    }
-
-    get length() { return Object.keys(this.__taskLists__).length; }
-    set length(_) { throw new Error("Assignment Error: length is not updatable.") }
-
-    static __reduceTaskList__(taskList) {
-        return {
-            // TODO add tests for these once controller requires them
-            //achived: taskList.archived,
-            //completed: taskList.completed,
-            //length: taskList.length,
-        }
-    }
-}
 
 async function createPromise(db, validateFunc, saveable) {
     validateFunc(saveable);
@@ -110,7 +59,7 @@ async function asyncDeleteUser(userUID) {
 }
 
 async function asyncNextUniqueTaskListID() {
-    return await db.taskList.nextUniqueID();
+    return db.taskList.nextUniqueID();
 }
 
 async function asyncCreateTaskList(taskList) {

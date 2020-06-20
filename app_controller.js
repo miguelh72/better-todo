@@ -1,7 +1,6 @@
 "use strict";
 
-const tasks = require("./tasks.js");
-const { User, Task } = require("./data_models");
+const { User, Task, TaskList } = require("./data_models");
 const persistence = require("./persistence.js");
 
 // TODO add logging of any errors
@@ -19,7 +18,7 @@ async function asyncNewUser(username, name, dateCreated) {
         newUser = new User(username, name, dateCreated);
 
         const defaultTaskListID = await persistence.asyncNextUniqueTaskListID();
-        defaultTaskList = tasks.createList(defaultTaskListID, "default", "Default task list.");
+        defaultTaskList = new TaskList(defaultTaskListID, "default", "Default task list.");
         await persistence.asyncCreateTaskList(defaultTaskList);
 
         // TODO can both calls below be integrated and hide createListTable call?
@@ -98,7 +97,7 @@ async function asyncNewTaskList(userUID, name = "New Task List", description = "
         await persistence.asyncNextUniqueTaskListID(),
         await persistence.asyncReadListTable(userUID),
     ]);
-    const taskList = tasks.createList(taskListID, name, description);
+    const taskList = new TaskList(taskListID, name, description);
     listTable.add(taskList);
     try {
         await persistence.asyncCreateTaskList(taskList);
