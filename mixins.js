@@ -212,6 +212,7 @@ function RestrictedContainer(superclass) {
         constructor({
             itemValidatorFunc = () => true,
             comparatorFunc = (a, b) => a === b,
+            transformationFunc = obj => obj,
         } = {}) {
             if (typeof itemValidatorFunc !== "function") throw new Error("Invalid Parameter: itemValidatorFunc must be"
                 + "a function that takes in an object and outputs a boolean stating if item is of an allowed type in"
@@ -219,38 +220,43 @@ function RestrictedContainer(superclass) {
             if (typeof comparatorFunc !== "function") throw new Error("Invalid Parameter: comparatorFunc must be a"
                 + " function that takes in two container items and outputs a boolean stating if they are logically"
                 + " equal.");
+            if (typeof transformationFunc !== "function") throw new Error("Invalid Parameter: transformationFunc must"
+                + " be a function that takes in an object and outputs another object that is stored in container.");
 
             super(...arguments);
             this.__isValidItem__ = itemValidatorFunc;
             this.__areEqual__ = comparatorFunc;
+            this.__transform__ = transformationFunc;
             this.__container__ = {};
             this.__length__ = 0;
             this.implementsRestrictedContainer = true;
         }
 
-        __findKey__(item) {
-            if (item.implementsUniqueID) { // O(1)
-                if (this.__container__[item.uid]) return item.uid;
+        __findKey__(containerItem) {
+            if (containerItem.implementsUniqueID) { // O(1)
+                if (this.__container__[containerItem.uid]) return containerItem.uid;
             } else { // O(n)
                 for (let [key, value] of Object.entries(this.__container__)) {
-                    if (this.__areEqual__(item, value)) return key;
+                    if (this.__areEqual__(containerItem, value)) return key;
                 }
             }
         }
 
         add(item) {
             this.__isValidItem__(item);
+            const containerItem = this.__transform__(item);
 
-            const key = (item.implementsUniqueID) ? item.uid : this.nextUniqueID();
-            this.__container__[key] = item;
+            const key = (containerItem.implementsUniqueID) ? containerItem.uid : this.nextUniqueID();
+            this.__container__[key] = containerItem;
             this.__length__++;
             return true;
         }
 
         remove(item) {
             if (!this.__isValidItem__(item)) return false;
+            const containerItem = this.__transform__(item);
 
-            const itemKey = this.__findKey__(item);
+            const itemKey = this.__findKey__(containerItem);
             if (itemKey != null) {
                 delete this.__container__[itemKey];
                 this.__length__--;
@@ -262,8 +268,9 @@ function RestrictedContainer(superclass) {
 
         contains(item) {
             if (!this.__isValidItem__(item)) return false;
+            const containerItem = this.__transform__(item);
 
-            const itemKey = this.__findKey__(item);
+            const itemKey = this.__findKey__(containerItem);
             return itemKey != null;
         }
 
@@ -276,17 +283,17 @@ function RestrictedContainer(superclass) {
     }
 }
 
-    module.exports = {
-        mix,
-        UniqueID,
-        Account,
-        Creatable,
-        Updatable,
-        Nameable,
-        Description,
-        Importance,
-        Urgency,
-        Archivable,
-        UniqueIDGeneratorMixin,
-        RestrictedContainer,
-    };
+module.exports = {
+    mix,
+    UniqueID,
+    Account,
+    Creatable,
+    Updatable,
+    Nameable,
+    Description,
+    Importance,
+    Urgency,
+    Archivable,
+    UniqueIDGeneratorMixin,
+    RestrictedContainer,
+};

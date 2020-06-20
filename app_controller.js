@@ -135,7 +135,7 @@ async function asyncRetrieveTaskList(taskListUID) {
  */
 async function asyncUpdateTaskList(userUID, taskList) {
     const userListTable = await persistence.asyncReadListTable(userUID);
-    if (!userListTable.contains(taskList.uid)) {
+    if (!userListTable.contains(taskList)) {
         try {
             if (await persistence.asyncReadTaskList(taskList.uid) != null) {
                 throw new Error("Unauthorized Request: Attempted to update another user's task list."); // TODO log this
@@ -156,7 +156,7 @@ async function asyncUpdateTaskList(userUID, taskList) {
 async function asyncDeleteTaskList(userUID, taskListUID) {
     let userListTable = await persistence.asyncReadListTable(userUID);
     try {
-        const contained = userListTable.remove(taskListUID);
+        const contained = userListTable.remove(new TaskList(taskListUID)); // matched on uniqueID
         if (!contained) {
             try {
                 if (await persistence.asyncReadTaskList(taskListUID) != null) {

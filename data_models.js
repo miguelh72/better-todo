@@ -112,10 +112,18 @@ class TaskList extends mixins.mix(
     }
 }
 
+/**
+ * Object with database filterable features of TaskList.
+ */
 class TaskListFeature extends mixins.mix(
     Object,
     mixins.UniqueID,
 ) {
+
+    /**
+     * @param {TaskList} taskList 
+     * @throws /Invalid Parameter/ if parameters do not validate.
+     */
     constructor(taskList) {
         validate.taskList(taskList);
 
@@ -126,56 +134,34 @@ class TaskListFeature extends mixins.mix(
             //completed: taskList.completed,
             //length: taskList.length,
     }
-
-    static fromTaskListIDOnly(taskListID) {
-        validate.uniqueID(taskListID);
-
-        return new TaskListFeature(new TaskList(taskListID));
-    }
 }
 
+/**
+ * Lookup table that defines which TaskList belong to a user. Contains a TaskListFeature object for each task list that
+ * can be used to filter for desired task lists.
+ */
 class ListTable extends mixins.mix(
     Object,
     mixins.UniqueID,
     mixins.RestrictedContainer,
 ) {
 
+    /**
+     * @param {User} user 
+     * @param {Array<TaskList>} taskListArray 
+     */
     constructor(user, taskListArray = []) {
         validate.user(user);
         taskListArray.forEach(taskList => validate.taskList(taskList));
 
         super({ 
             uniqueID: user.uid,
-            itemValidatorFunc: item => item instanceof TaskListFeature,
+            itemValidatorFunc: validate.taskList,
             comparatorFunc: (taskList1, taskList2) => taskList1.uid === taskList2.uid,
+            transformationFunc: taskList => new TaskListFeature(taskList),
         });
-        taskListArray
-            .map(taskList => new TaskListFeature(taskList))
-            .forEach(taskListFeature => super.add(taskListFeature));
+        taskListArray.forEach(taskList => super.add(taskList));
         this.implementsListTable = true;
-    }
-
-    add(taskList) {
-        // Warning: Violates Liskov's Substitution Principle, since RestrictedContainer expects what is passed to add
-        // to be saved, but instead we save a TaskListFeature object instead of a TaskList object.
-
-        return super.add(new TaskListFeature(taskList));
-    }
-
-    remove(taskListID) {
-        // Warning: Violates Liskov's Substitution Principle, since RestrictedContainer expects what is passed to be
-        // removed, but instead we remove a TaskListFeature object instead of a number object.
-
-        validate.uniqueID(taskListID);
-
-        return super.remove(TaskListFeature.fromTaskListIDOnly(taskListID));
-    }
-
-    contains(taskListID) {
-        // Warning: Violates Liskov's Substitution Principle, since RestrictedContainer expects what is passed to be
-        // found in container, but instead we match a TaskListFeature object instead of a number object.
-
-        return super.contains(TaskListFeature.fromTaskListIDOnly(taskListID));
     }
 }
 
