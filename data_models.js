@@ -2,6 +2,7 @@
 
 const mixins = require("./mixins");
 const validate = require("./validation");
+const { task } = require("./validation");
 
 /**
  * Object that stores an app user's information.
@@ -14,11 +15,12 @@ class User extends mixins.mix(
     mixins.Updatable,
     mixins.Nameable,
 ) {
+
     /**
      * @param {string} username 
      * @param {string} name 
      * @param {Date} dateCreated 
-     * @throws /Invalid Parameter/ if invalid username, name, or date is provided.
+     * @throws /Invalid Parameter/ if parameters do not validate.
      */
     constructor(username, name = "Guest", dateCreated = new Date()) {
         super({
@@ -43,12 +45,14 @@ class User extends mixins.mix(
     mixins.Urgency,
     mixins.Archivable,
 ) {
+
     /**
      * @param {string} description 
      * @param {Date} dateCreated 
      * @param {Date} dueDate 
      * @param {boolean} isImportant 
      * @param {boolean} isUrgent 
+     * @throws /Invalid Parameter/ if parameters do not validate.
      */
     constructor(description = "", dateCreated = new Date(), dueDate = null, isImportant = false, isUrgent = false) {
         super({
@@ -62,6 +66,9 @@ class User extends mixins.mix(
     }
 }
 
+/**
+ * Object that stores multiple Task objects belonging to a user's defined task group.
+ */
 class TaskList extends mixins.mix(
     Object,
     mixins.UniqueID,
@@ -71,6 +78,12 @@ class TaskList extends mixins.mix(
     mixins.RestrictedContainer,
 ) {
 
+    /**
+     * @param {number} taskListID 
+     * @param {string} name 
+     * @param {string} description 
+     * @throws /Invalid Parameter/ if parameters do not validate.
+     */
     constructor(taskListID, name, description) {
         super({
             uniqueID: taskListID,
@@ -99,111 +112,70 @@ class TaskList extends mixins.mix(
     }
 }
 
-/* class ListTable extends mixins.mix(
+class TaskListFeature extends mixins.mix(
     Object,
     mixins.UniqueID,
 ) {
-
-    constructor(user, taskListArray) {
-        validate.user(user);
-        taskListArray.forEach(taskList => validate.taskList(taskList));
-
-        super({ uniqueID: user.uid });
-        this.userID = user.uid;
-        this.__taskLists__ = taskListArray.reduce((listDict, taskList) => {
-            listDict[taskList.uid] = ListTable.__reduceTaskList__(taskList);
-            return listDict;
-        }, {});
-        this.implementsListTable = true;
-    }
-
-    add(taskList) {
+    constructor(taskList) {
         validate.taskList(taskList);
 
-        this.__taskLists__[taskList.uid] = ListTable.__reduceTaskList__(taskList);
-        return true;
-    }
-
-    remove(taskListID) {
-        validate.uniqueID(taskListID);
-
-        if (this.__taskLists__[taskListID] == null) return false;
-        delete this.__taskLists__[taskListID];
-        return true;
-    }
-
-    getListIDs() {
-        return Object.keys(this.__taskLists__).map(id => parseInt(id));
-    }
-
-    contains(taskListID) {
-        return this.__taskLists__[taskListID] != null;
-    }
-
-    get length() { return Object.keys(this.__taskLists__).length; }
-    set length(_) { throw new Error("Assignment Error: length is not updatable.") }
-
-    static __reduceTaskList__(taskList) {
-        return {
-            // TODO add tests for these once controller requires them
+        super({uniqueID: taskList.uid});
+        // TODO add this. properties for features to extract from taskList
+        // add tests for these once controller requires them
             //achived: taskList.archived,
             //completed: taskList.completed,
             //length: taskList.length,
-        }
     }
-} */
+
+    static fromTaskListIDOnly(taskListID) {
+        validate.uniqueID(taskListID);
+
+        return new TaskListFeature(new TaskList(taskListID));
+    }
+}
 
 class ListTable extends mixins.mix(
     Object,
     mixins.UniqueID,
+    mixins.RestrictedContainer,
 ) {
 
-    constructor(user, taskListArray) {
+    constructor(user, taskListArray = []) {
         validate.user(user);
         taskListArray.forEach(taskList => validate.taskList(taskList));
 
-        super({ uniqueID: user.uid });
-        this.userID = user.uid;
-        this.__taskLists__ = taskListArray.reduce((listDict, taskList) => {
-            listDict[taskList.uid] = ListTable.__reduceTaskList__(taskList);
-            return listDict;
-        }, {});
+        super({ 
+            uniqueID: user.uid,
+            itemValidatorFunc: item => item instanceof TaskListFeature,
+            comparatorFunc: (taskList1, taskList2) => taskList1.uid === taskList2.uid,
+        });
+        taskListArray
+            .map(taskList => new TaskListFeature(taskList))
+            .forEach(taskListFeature => super.add(taskListFeature));
         this.implementsListTable = true;
     }
 
     add(taskList) {
-        validate.taskList(taskList);
+        // Warning: Violates Liskov's Substitution Principle, since RestrictedContainer expects what is passed to add
+        // to be saved, but instead we save a TaskListFeature object instead of a TaskList object.
 
-        this.__taskLists__[taskList.uid] = ListTable.__reduceTaskList__(taskList);
-        return true;
+        return super.add(new TaskListFeature(taskList));
     }
 
     remove(taskListID) {
+        // Warning: Violates Liskov's Substitution Principle, since RestrictedContainer expects what is passed to be
+        // removed, but instead we remove a TaskListFeature object instead of a number object.
+
         validate.uniqueID(taskListID);
 
-        if (this.__taskLists__[taskListID] == null) return false;
-        delete this.__taskLists__[taskListID];
-        return true;
-    }
-
-    getListIDs() {
-        return Object.keys(this.__taskLists__).map(id => parseInt(id));
+        return super.remove(TaskListFeature.fromTaskListIDOnly(taskListID));
     }
 
     contains(taskListID) {
-        return this.__taskLists__[taskListID] != null;
-    }
+        // Warning: Violates Liskov's Substitution Principle, since RestrictedContainer expects what is passed to be
+        // found in container, but instead we match a TaskListFeature object instead of a number object.
 
-    get length() { return Object.keys(this.__taskLists__).length; }
-    set length(_) { throw new Error("Assignment Error: length is not updatable.") }
-
-    static __reduceTaskList__(taskList) {
-        return {
-            // TODO add tests for these once controller requires them
-            //achived: taskList.archived,
-            //completed: taskList.completed,
-            //length: taskList.length,
-        }
+        return super.contains(TaskListFeature.fromTaskListIDOnly(taskListID));
     }
 }
 

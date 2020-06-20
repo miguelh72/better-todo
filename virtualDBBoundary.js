@@ -65,8 +65,9 @@ function copyTaskList(taskList) {
 
 function copyListTable(listTable) {
     const user = new User(listTable.uid);
-    const listTableCopy = Object.assign(new ListTable(user, []), listTable);
-    listTableCopy.__taskLists__ = Object.assign(new Object(), listTable.__taskLists__);
+    const listTableCopy = Object.assign(new ListTable(user), listTable);
+    // TODO copy list table features
+    //listTableCopy.__taskLists__ = Object.assign(new Object(), listTable.__taskLists__);
     return listTableCopy;
 }
 

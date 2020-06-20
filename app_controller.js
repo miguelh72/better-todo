@@ -75,7 +75,7 @@ async function asyncDeleteUser(userUID) {
     try {
         const userListTable = await persistence.asyncReadListTable(userUID);
         await Promise.all(
-            userListTable.getListIDs().map(taskListID => persistence.asyncDeleteTaskList(taskListID))
+            userListTable.toArray().map(taskListFeature => persistence.asyncDeleteTaskList(taskListFeature.uid))
         );
         await persistence.asyncDeleteListTable(userUID);
         return await persistence.asyncDeleteUser(userUID);

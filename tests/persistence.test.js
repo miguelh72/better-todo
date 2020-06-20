@@ -253,9 +253,9 @@ test("Create list table", () => {
     const taskListArray = [...Array(numTaskLists).keys()].map(uid => new TaskList(uid));
     const listTable = persistence.createListTable(user, taskListArray);
 
-    expect(listTable.userID).toBe(user.uid);
+    expect(listTable.uid).toBe(user.uid);
     expect(listTable.length).toBe(taskListArray.length);
-    const listTableListIDs = listTable.getListIDs();
+    const listTableListIDs = listTable.toArray().map(taskListFeature => taskListFeature.uid);
     taskListArray.forEach(taskList => expect(listTableListIDs.includes(taskList.uid)).toBe(true));
 });
 
@@ -270,13 +270,13 @@ test("Add and remove from list table", () => {
 
     taskListArray.push(taskListToAdd);
     expect(listTable.add(taskListToAdd)).toBe(true);
-    let listTableListIDs = listTable.getListIDs();
+    let listTableListIDs = listTable.toArray().map(taskListFeature => taskListFeature.uid);
     taskListArray.forEach(taskList => expect(listTableListIDs.includes(taskList.uid)).toBe(true));
 
     for (let taskListIndexToRemove of taskListIndeciesToRemove) {
         expect(listTable.remove(taskListArray[taskListIndexToRemove].uid)).toBe(true);
         expect(listTable.remove(taskListArray[taskListIndexToRemove].uid)).toBe(false); // not in list
-        listTableListIDs = listTable.getListIDs();
+        listTableListIDs = listTable.toArray().map(taskListFeature => taskListFeature.uid);
         expect(listTableListIDs.includes(taskListArray[taskListIndexToRemove])).toBe(false);
     }
 });

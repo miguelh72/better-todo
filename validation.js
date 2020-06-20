@@ -92,6 +92,7 @@ class Validate {
     static listTable(input) {
         return Validate.containsMixin(input, "ListTable",
             "UniqueID",
+            "RestrictedContainer",
             "ListTable",
         );
     }

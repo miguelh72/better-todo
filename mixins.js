@@ -261,7 +261,7 @@ function RestrictedContainer(superclass) {
         }
 
         contains(item) {
-            if (!this.__isValid__(item)) return false;
+            if (!this.__isValidItem__(item)) return false;
 
             const itemKey = this.__findKey__(item);
             return itemKey != null;

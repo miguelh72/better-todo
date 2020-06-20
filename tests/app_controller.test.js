@@ -41,7 +41,7 @@ async function testUserCreation(user) {
     const userListTable = await persistence.asyncReadListTable(user.uid);
     expect(validate.listTable(userListTable)).toBe(true);
 
-    const defaultTaskListID = userListTable.getListIDs()[0];
+    const defaultTaskListID = userListTable.toArray()[0].uid;
     expect(validate.uniqueID(defaultTaskListID)).toBe(true);
     const defaultTaskList = await persistence.asyncReadTaskList(defaultTaskListID);
     expect(validate.taskList(defaultTaskList)).toBe(true);
@@ -140,7 +140,7 @@ test("Try to update User that does not exist", async () => {
 test("Delete User from storage", async () => {
     const user = await controller.asyncNewUser(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
     const userListTable = await persistence.asyncReadListTable(user.uid);
-    const defaultTaskList = await persistence.asyncReadTaskList(userListTable.getListIDs()[0]);
+    const defaultTaskList = await persistence.asyncReadTaskList(userListTable.toArray()[0].uid);
 
     await expect(controller.asyncDeleteUser(user.uid)).resolves.toBe(true);
     await expect(persistence.asyncReadListTable(user.uid)).rejects.toThrow(/Missing Resource/);
@@ -174,7 +174,7 @@ test("Create new task list", async () => {
     );
     testTaskListCreation(user, newTaskList);
     const userListTable = await persistence.asyncReadListTable(user.uid);
-    expect(userListTable.getListIDs()[1]).toBe(newTaskList.uid);
+    expect(userListTable.toArray().some(taskListFeature => taskListFeature.uid === newTaskList.uid)).toBe(true);
 
     await cleanupPersistence();
 });
