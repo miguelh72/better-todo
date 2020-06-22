@@ -1,7 +1,6 @@
 "use strict";
 
 const validate = require("./validation.js");
-const { ListTable } = require("./data_models");
 const db = require("./virtualDBBoundary.js");
 
 async function createPromise(db, validateFunc, saveable) {
@@ -82,10 +81,6 @@ async function asyncDeleteTaskList(taskListUID) {
     return await deletePromise(db.taskList, taskListUID);
 }
 
-function createListTable(user, taskListArray) {
-    return new ListTable(user, taskListArray);
-}
-
 async function asyncCreateListTable(listTable) {
     return await createPromise(db.listTable, () => true, listTable);
 }
@@ -120,7 +115,6 @@ module.exports = {
     asyncUpdateTaskList,
     asyncDeleteTaskList,
 
-    createListTable,
     asyncCreateListTable,
     asyncReadListTable,
     asyncReadAllListTable,

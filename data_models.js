@@ -2,7 +2,6 @@
 
 const mixins = require("./mixins");
 const validate = require("./validation");
-const { task } = require("./validation");
 
 /**
  * Object that stores an app user's information.
@@ -170,4 +169,5 @@ module.exports = {
     Task,
     TaskList,
     ListTable,
+    TaskListFeature, // TODO remove this once you stop using RAM virtual storage
 }

@@ -190,7 +190,7 @@ function Archivable(superclass) {
     }
 }
 
-function UniqueIDGeneratorMixin(superclass) {
+function UniqueIDGenerator(superclass) {
     return class uniqueIDGeneratorMixin extends superclass {
         constructor() {
             super(...arguments);
@@ -208,7 +208,7 @@ function UniqueIDGeneratorMixin(superclass) {
 }
 
 function RestrictedContainer(superclass) {
-    return class RestrictedContainer extends UniqueIDGeneratorMixin(superclass) {
+    return class RestrictedContainer extends UniqueIDGenerator(superclass) {
         constructor({
             itemValidatorFunc = () => true,
             comparatorFunc = (a, b) => a === b,
@@ -294,6 +294,6 @@ module.exports = {
     Importance,
     Urgency,
     Archivable,
-    UniqueIDGeneratorMixin,
+    UniqueIDGenerator,
     RestrictedContainer,
 };

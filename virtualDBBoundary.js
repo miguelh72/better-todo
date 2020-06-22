@@ -1,7 +1,8 @@
 "use strict";
 
 const mixins = require("./mixins");
-const { User, Task, TaskList, ListTable } = require("./data_models");
+const { User, Task, TaskList, ListTable, TaskListFeature } = require("./data_models");
+const { task } = require("./validation");
 
 class UniqueIDVirtualStorage {
 
@@ -59,6 +60,7 @@ function copyTaskList(taskList) {
         taskListCopy.__container__[key] = Object.assign(new Task(), task);
     });
     // TODO will nextUniqueID behave the same between copy and original? Test this
+    //throw new Error("Create test in persistence.test.js");
 
     return taskListCopy;
 }
@@ -66,13 +68,23 @@ function copyTaskList(taskList) {
 function copyListTable(listTable) {
     const user = new User(listTable.uid);
     const listTableCopy = Object.assign(new ListTable(user), listTable);
-    // TODO copy list table features
-    //listTableCopy.__taskLists__ = Object.assign(new Object(), listTable.__taskLists__);
+    listTableCopy.__container__ = Object.values(listTable.__container__).reduce(
+        (container, taskListFeature) => {
+            container[taskListFeature.uid] = new TaskListFeature(
+                new TaskList(
+                    taskListFeature.uid, 
+                    taskListFeature.name, 
+                    taskListFeature.description
+                )
+            );
+            return container;
+        }
+    , {});
     return listTableCopy;
 }
 
 const virtualUserDB = new UniqueIDVirtualStorage(copyUser);
-const virtualTaskListDB = new (mixins.UniqueIDGeneratorMixin(UniqueIDVirtualStorage))(copyTaskList);
+const virtualTaskListDB = new (mixins.UniqueIDGenerator(UniqueIDVirtualStorage))(copyTaskList);
 const virtualListTableDB = new UniqueIDVirtualStorage(copyListTable);
 module.exports = {
     user: virtualUserDB,

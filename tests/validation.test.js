@@ -1,7 +1,6 @@
 const validate = require("../validation.js");
-const persistence = require("../persistence.js");
 const mixins = require("../mixins.js");
-const { User, Task, TaskList } = require("../data_models");
+const { User, Task, TaskList, ListTable } = require("../data_models");
 
 test("Validate date inputs", () => {
     expect(validate.date(new Date())).toBe(true);
@@ -145,7 +144,7 @@ test("Validate User input", () => {
 test("Validate list table input", () => {
     const user = new User("mike72");
     const taskLists = [new TaskList(1)];
-    const listTable = persistence.createListTable(user, taskLists);
+    const listTable = new ListTable(user, taskLists);
 
     expect(validate.listTable(listTable)).toBe(true);
     expect(() => validate.listTable(new Object())).toThrow(/Invalid Parameter/);
