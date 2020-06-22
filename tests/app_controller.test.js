@@ -130,7 +130,7 @@ test("Update User name", async () => {
 test("Try to update User that does not exist", async () => {
     const user = new User(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
 
-    await expect(controller.asyncUpdateUser(user)).rejects.toThrow(/Missing Resource/);
+    await expect(controller.asyncUpdateUser(user)).resolves.toBe(false);
 
     await cleanupPersistence();
 });
@@ -254,7 +254,7 @@ test("Try to update task list that does not exist", async () => {
     const user = new User(testUserInfo.username, testUserInfo.name, testUserInfo.dateCreated);
     const taskListNotStored = new TaskList(user.uid, testTaskListInfo.name, testTaskListInfo.description);
 
-    await expect(controller.asyncUpdateTaskList(user.uid, taskListNotStored)).rejects.toThrow(/Missing Resource/);
+    await expect(controller.asyncUpdateTaskList(user.uid, taskListNotStored)).resolves.toBe(false);
 
     await cleanupPersistence();
 });

@@ -59,8 +59,6 @@ function copyTaskList(taskList) {
     Object.entries(taskList.__container__).forEach(([key, task]) => {
         taskListCopy.__container__[key] = Object.assign(new Task(), task);
     });
-    // TODO will nextUniqueID behave the same between copy and original? Test this
-    //throw new Error("Create test in persistence.test.js");
 
     return taskListCopy;
 }

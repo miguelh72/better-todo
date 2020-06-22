@@ -4,7 +4,7 @@ const personNameRegex = /^([^\W\d_]+\s*){1,}$/i;
 const usernameRegex = /^[^\W\d_]+\w{2,}$/i;
 
 function date(input) {
-    if (!(input instanceof Date)) throw new Error("Invalid Parameter: Date paramete must be of type Date.");
+    if (!(input instanceof Date)) throw new Error("Invalid Parameter: Date parameter must be of type Date.");
     return true;
 }
 
