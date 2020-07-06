@@ -1,0 +1,16 @@
+.text-logo {
+	color: #eb5757;
+}
+.bg-light-grey {
+	background-color: #f2f2f2;
+}
+
+.logo-square {
+	font-family: 'Lobster';
+	font-size: 2rem;
+}
+.logo-todo {
+	font-family: 'Iceland';
+	font-size: 3.5rem;
+	line-height: normal;
+}

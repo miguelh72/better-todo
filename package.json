@@ -1,22 +1,30 @@
 {
-  "name": "better_todo",
-  "version": "1.0.0",
-  "description": "Todo app with emphasis on functional viws and microservice API.",
-  "main": "index.js",
-  "scripts": {
-    "test": "jest"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/miguelh72/better-todo.git"
-  },
-  "author": "Miguel Hernandez",
-  "license": "UNLICENSED",
-  "bugs": {
-    "url": "https://github.com/miguelh72/better-todo/issues"
-  },
-  "homepage": "https://github.com/miguelh72/better-todo#readme",
-  "devDependencies": {
-    "jest": "^26.0.1"
-  }
+	"name": "better_todo",
+	"version": "1.0.0",
+	"description": "Todo app with emphasis on functional viws and microservice API.",
+	"main": "index.js",
+	"scripts": {
+		"test": "jest",
+		"dev": "nodemon app.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/miguelh72/better-todo.git"
+	},
+	"author": "Miguel Hernandez",
+	"license": "UNLICENSED",
+	"bugs": {
+		"url": "https://github.com/miguelh72/better-todo/issues"
+	},
+	"homepage": "https://github.com/miguelh72/better-todo#readme",
+	"devDependencies": {
+		"jest": "^26.0.1",
+		"nodemon": "^2.0.4"
+	},
+	"dependencies": {
+		"express": "^4.17.1",
+		"method-override": "^3.0.0",
+		"morgan": "^1.10.0",
+		"pug": "^3.0.0"
+	}
 }
