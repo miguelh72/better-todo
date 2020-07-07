@@ -10,8 +10,8 @@ html(lang="en")
         link(rel="stylesheet" href="/css/style.css")
 
         //- Fonts
-        link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster:400,700")
-        link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Iceland:400,700")
+        link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster:400")
+        link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Iceland:400")
         link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700")
 
     body(class="bg-light-grey")
@@ -20,6 +20,8 @@ html(lang="en")
             include navbar_guest
 
             block content
+
+            include footer
 
         //- Javascript
         script(src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous")

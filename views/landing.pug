@@ -1,5 +1,20 @@
 extends template
 
 block content
-    section(class="bg-white block-shadow my-4 py-2")
-        h1 Hello World
+    section(class="bg-white block-shadow my-4 p-3")
+        h1(class="text-text font-heading font-bold heading-border") A cogent task list
+        p(class="text-text font-task") We believe in a clear 4-square representation of tasks that will give you a better understand of where you should spend your time.
+        
+        //- TODO replace this with programatic graph which you will need anyways to show squares later on
+        img(id="philosphy-visual" class="d-block mx-auto my-1" src="/images/4-square-representation.svg" alt="")
+
+    section(class="bg-white block-shadow my-4 p-3")
+        h1(class="text-text font-heading font-bold heading-border") How it works
+        p(class="text-text font-task") When you make a task choose if it’s important and either designate it as urgent or assign a due date. When a task with a due date will becomes urgent can be changed per task list.
+        p(class="text-text font-task mb-0") That’s it! Two choices and you gain a powerful insight into how to coordinate your time. 
+            a(href="#signup" class="text-logo font-bold no-underline") Sign up below!
+    
+    section(class="bg-white block-shadow my-4 p-3")
+        h1(id="signup" class="text-text font-heading font-bold heading-border") Sign Up!
+        
+        include signup
