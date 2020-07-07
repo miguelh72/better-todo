@@ -14,7 +14,7 @@ app.set('view engine', 'pug');
 // Routing
 app.use(express.static('./public'));
 app.get('/', (req, res) => {
-	return res.render('index');
+	return res.render('landing');
 });
 
 // Launch Server
